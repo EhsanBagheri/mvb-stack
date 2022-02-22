@@ -25,6 +25,10 @@ end manchester_decoder;
 
 architecture Behavioral of manchester_coder is
 
+---------------------------------------------------------------
+---------------------- INTERNAL SIGNALS -----------------------
+---------------------------------------------------------------
+
 -- create internal registers for edge detection:
 signal man_data_in1 : std_logic;
 signal man_data_in2 : std_logic;
@@ -36,14 +40,38 @@ signal no_bits_recieved : std_logic;
 signal clk1x : std_logic;
 signal clk1x_en : std_logic;
 
--- when is the reciever to decode data?
-signal sampe : std_logic;
-
 -- variable used by the counter to determine end count
 signal first : std_logic;
 
+-- counter for sampling at 25% clk and 75% clk and sample enable signal
+signal fourth_counter : std_logic_vector(4 downto 0);
+signal sample_manchester_input : std_logic;
+
+---------------------------------------------------------------
+------------------- BEHAVIORAL DESCRIPTION --------------------
+---------------------------------------------------------------
 begin
 
+-- sample on every 4th and every 12th 16x clock rise
+process(clk16x, rst)
+	begin
+		if(rst = '1')then
+			fourth_counter <= "0000";
+		elsif(rising_edge(clk16x))then
+			fourth_counter <= fourth_counter + 1;
+		end if;
+	end process;
+
+process(clk16x, fourth_counter)
+	begin
+		if(fourth_counter = '3')then
+			sample_manchester_input <= '1';
+		elsif(fourth_counter = "11")then
+			sample_manchester_input <= '1';
+		else
+			sample_manchester_input <= 0;
+		end if;
+	end process;
 
 
 end Behavioral;
