@@ -4,14 +4,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity manchester_decoder is
     Port ( clk16x : in  std_logic;										-- 16x clock input for clock recovery and oversampling
@@ -23,7 +15,12 @@ entity manchester_decoder is
 			  );								
 end manchester_decoder;
 
-architecture Behavioral of manchester_coder is
+architecture Behavioral of manchester_decoder is
+
+component four_bit_counter is
+    Port ( rst,clk,up_dwn : in std_logic;
+           output: out std_logic_vector(0 to 3));
+end component four_bit_counter;
 
 ---------------------------------------------------------------
 ---------------------- INTERNAL SIGNALS -----------------------
@@ -44,7 +41,7 @@ signal clk1x_en : std_logic;
 signal first : std_logic;
 
 -- counter for sampling at 25% clk and 75% clk and sample enable signal
-signal fourth_counter : std_logic_vector(4 downto 0);
+signal fourth_counter : std_logic_vector(3 downto 0);
 signal sample_manchester_input : std_logic;
 
 ---------------------------------------------------------------
@@ -52,26 +49,17 @@ signal sample_manchester_input : std_logic;
 ---------------------------------------------------------------
 begin
 
--- sample on every 4th and every 12th 16x clock rise
-process(clk16x, rst)
-	begin
-		if(rst = '1')then
-			fourth_counter <= "0000";
-		elsif(rising_edge(clk16x))then
-			fourth_counter <= fourth_counter + 1;
-		end if;
-	end process;
+-- create counter that counts from 0x00 to 0xFF
+sampling_counter: four_bit_counter port map(
+	rst => rst,
+	clk => clk16x,
+	up_dwn => '0',
+	output => fourth_counter
+);
 
-process(clk16x, fourth_counter)
-	begin
-		if(fourth_counter = '3')then
-			sample_manchester_input <= '1';
-		elsif(fourth_counter = "11")then
-			sample_manchester_input <= '1';
-		else
-			sample_manchester_input <= 0;
-		end if;
-	end process;
+-- sample value at clk3 and clk11
+sample_manchester_input <= '1' when (fourth_counter = "0011") or (fourth_counter = "1011") else '0';
+
 
 
 end Behavioral;
