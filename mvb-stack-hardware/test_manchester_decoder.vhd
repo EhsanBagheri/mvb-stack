@@ -10,11 +10,11 @@ END testbench;
 ARCHITECTURE behavior OF testbench IS
 
 	component manchester_decoder is
-		Port(clk16x : in  std_logic;
+		Port(clk_xx : in  std_logic;
 			  rst : in std_logic;
 			  rdn : in std_logic;
 			  manchester_in : in  std_logic;
-			  decoded_out : out  std_logic_vector(7 downto 0);		
+			  decoded_out : out  unsigned(7 downto 0);		
 			  data_ready : out	std_logic
 			  );
 	end component manchester_decoder;
@@ -23,7 +23,7 @@ ARCHITECTURE behavior OF testbench IS
 	signal rst : std_logic;
 	signal rdn : std_logic;
 	signal manchester_in : std_logic;
-	signal decoded_out : std_logic_vector(7 downto 0);
+	signal decoded_out : unsigned(7 downto 0);
 	signal data_ready : std_logic;
 	
 	
@@ -32,7 +32,7 @@ BEGIN
 
 -- Component Instantiation
 		 tested_decoder: manchester_decoder PORT MAP(
-					clk16x => clk,
+					clk_xx => clk,
 					rst => rst,
 					rdn => rdn,
 					manchester_in => manchester_in,
