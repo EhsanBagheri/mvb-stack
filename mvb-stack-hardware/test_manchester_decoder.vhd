@@ -10,7 +10,7 @@ END testbench;
 
 ARCHITECTURE behavior OF testbench IS
 
-	component manchester_decoder is
+	component e_MANCHESTER_DECODER is
 		Port(clk_xx : in  		std_logic;
 			  rst : in 				std_logic;
 			  rdn : in 				std_logic;
@@ -18,7 +18,7 @@ ARCHITECTURE behavior OF testbench IS
 			  decoded_out : out  unsigned(7 downto 0);		
 			  data_ready : out	std_logic
 			  );
-	end component manchester_decoder;
+	end component e_MANCHESTER_DECODER;
 	
 	constant clk_period : time := 10 ns;
 	-- Random test constant from the internet 10100111001 (for now)
@@ -38,7 +38,7 @@ BEGIN
 
 
 -- Component Instantiation
-		 tested_decoder: manchester_decoder PORT MAP(
+		 tested_decoder: e_MANCHESTER_DECODER PORT MAP(
 					clk_xx => clk_xx,
 					rst => rst,
 					rdn => rdn,

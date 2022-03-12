@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/student/mvb-stack/mvb-stack-hardware/testbench_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="testbench" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="17" />
+   <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_xx</obj_property>
+      <obj_property name="ObjectShortName">clk_xx</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/manchester_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">manchester_in</obj_property>
+      <obj_property name="ObjectShortName">manchester_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_sample_at_25" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_sample_at_25</obj_property>
+      <obj_property name="ObjectShortName">s_sample_at_25</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_sample_at_75" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_sample_at_75</obj_property>
+      <obj_property name="ObjectShortName">s_sample_at_75</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_sample_manchester_input" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_sample_manchester_input</obj_property>
+      <obj_property name="ObjectShortName">s_sample_manchester_input</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_sampling_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_sampling_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_sampling_counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_sampling_counter_at_half_bit" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_sampling_counter_at_half_bit[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_sampling_counter_at_half_bit[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_input_edge_shift" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_input_edge_shift[1:0]</obj_property>
+      <obj_property name="ObjectShortName">r_input_edge_shift[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_input_bit_time_shift" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_input_bit_time_shift[1:0]</obj_property>
+      <obj_property name="ObjectShortName">r_input_bit_time_shift[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_at_edge" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_at_edge</obj_property>
+      <obj_property name="ObjectShortName">s_at_edge</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_in_bit_middle" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_in_bit_middle</obj_property>
+      <obj_property name="ObjectShortName">s_in_bit_middle</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_current_bit_decoded" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">r_current_bit_decoded</obj_property>
+      <obj_property name="ObjectShortName">r_current_bit_decoded</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_man_data_in_shift" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_man_data_in_shift[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_man_data_in_shift[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/data_ready" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">data_ready</obj_property>
+      <obj_property name="ObjectShortName">data_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/decoded_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">decoded_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">decoded_out[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/test_manchester_code" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">test_manchester_code[21:0]</obj_property>
+      <obj_property name="ObjectShortName">test_manchester_code[21:0]</obj_property>
+   </wvobject>
+</wave_config>
