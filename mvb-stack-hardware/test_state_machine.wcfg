@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/student/mvb-stack/mvb-stack-hardware/testbench_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="testbench" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="11" />
+   <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_xx</obj_property>
+      <obj_property name="ObjectShortName">clk_xx</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/test_manchester_code" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">test_manchester_code[49:0]</obj_property>
+      <obj_property name="ObjectShortName">test_manchester_code[49:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_input_bit_time_shift" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_input_bit_time_shift[1:0]</obj_property>
+      <obj_property name="ObjectShortName">r_input_bit_time_shift[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/manchester_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">manchester_in</obj_property>
+      <obj_property name="ObjectShortName">manchester_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_at_rising_edge" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_at_rising_edge</obj_property>
+      <obj_property name="ObjectShortName">s_at_rising_edge</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_start_bit_bit_time" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_bit_bit_time[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_bit_bit_time[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_state" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">r_state[2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_start_delimiter_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_delimiter_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_delimiter_counter[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_start_delimiter_value_check" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">s_start_delimiter_value_check[1:0]</obj_property>
+      <obj_property name="ObjectShortName">s_start_delimiter_value_check[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_start_delimiter_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_delimiter_in[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_delimiter_in[15:0]</obj_property>
+   </wvobject>
+</wave_config>

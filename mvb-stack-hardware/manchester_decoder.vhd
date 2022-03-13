@@ -65,6 +65,7 @@ signal s_START_DELIMITER_VALUE_CHECK : std_logic_vector(1 downto 0) := "00";			-
 -- state machine signals:
 signal r_STATE : std_logic_vector(2 downto 0) := "000";
 signal s_AT_RISING_EDGE : std_logic := '0';												-- 1 if a rising edge is detected (as close to the rising edge as possible)
+signal s_AT_FALLING_EDGE : std_logic := '0';												-- 1 if a falling edge is detected (-||-)
 signal r_START_BIT_BIT_TIME : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);		-- counter to measure the half bit time of the start bit
 signal s_DECODE_MANCHESTER : std_logic := '0';											-- only decode manchester signal if either data or CRC is being received
 
@@ -74,12 +75,12 @@ signal s_DECODE_MANCHESTER : std_logic := '0';											-- only decode manchest
 begin
 
 --_____________________________DECODE MANCHESTER CODE_____________________________--
-s_DECODE_MANCHESTER <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE) or (r_STATE = r_RECEIVE_CRC)) else '0';
+s_DECODE_MANCHESTER <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE) or (r_STATE = v_RECEIVE_CRC)) else '0';
 
 -- get input bit into shift register on every sample enable signal (bit value detection)
 p_DETECT_IN_BIT_STATE_CHANGE : process(clk_xx)
 begin
-	if(rising_edge(clk_xx) and (s_DECODE_MANCHESTER = '1')) then
+	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_INPUT_EDGE_SHIFT <= "00";
 		elsif(s_SAMPLE_MANCHESTER_INPUT = '1') then
@@ -96,7 +97,7 @@ s_AT_EDGE <= '1' when ((r_INPUT_BIT_TIME_SHIFT = "10") or (r_INPUT_BIT_TIME_SHIF
 
 p_DETECT_BIT_TIME : process(clk_xx)
 begin
-	if(rising_edge(clk_xx) and (s_DECODE_MANCHESTER = '1')) then
+	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_INPUT_BIT_TIME_SHIFT <= "00";
 		else
@@ -113,7 +114,7 @@ end process p_DETECT_BIT_TIME;
 -- 	save currently decoded bit value when the clock cycle comes to an end (LSB FIRST)
 p_SAMPLING_COUNTER : process(clk_xx)
 begin
-	if(rising_edge(clk_xx) and (s_DECODE_MANCHESTER = '1')) then
+	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			r_MAN_DATA_IN_SHIFT(7 downto 0) <= "00000000";
@@ -215,7 +216,7 @@ begin
 				when others =>		r_STATE <= v_IDLE;
 			end case;
 		else
-			r_STATE 	<= v_IDLE;
+			--r_STATE 	<= v_IDLE;
 		end if;
 	else
 	end if;
