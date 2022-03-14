@@ -15,7 +15,7 @@ ARCHITECTURE behavior OF testbench IS
 			  rst : in 				std_logic;
 			  rdn : in 				std_logic;
 			  manchester_in : in	std_logic;
-			  decoded_out : out  unsigned(7 downto 0);		
+			  decoded_out : out  std_logic_vector(15 downto 0);		
 			  data_ready : out	std_logic
 			  );
 	end component e_MANCHESTER_DECODER;
@@ -24,14 +24,15 @@ ARCHITECTURE behavior OF testbench IS
 	-- Random test constant from the internet 10100111001 (for now)
 	-- constant test_manchester_code : std_logic_vector(21 downto 0) := "1001100101101010010110";	--random manchester code
 	-- constant test_manchester_code : std_logic_vector(49 downto 0) := "00000000000000001100011100010101010000000000000000";	--slave delim
-	constant test_manchester_code : std_logic_vector(49 downto 0) := "00000000000000001010100011100011010000000000000000";
+	-- constant test_manchester_code : std_logic_vector(49 downto 0) := "00000000000000001010100011100011010000000000000000";	-- master delim
+	constant test_manchester_code : std_logic_vector(81 downto 0) := "0000000000000000010110100101101001011010010110101010100011100011010000000000000000";	
 	signal i : integer := 0;
 	
 	signal clk_xx : std_logic := '0';
 	signal rst : std_logic := '0';
 	signal rdn : std_logic := '0';
 	signal manchester_in : std_logic := '0';
-	signal decoded_out : unsigned(7 downto 0) := "00000000";
+	signal decoded_out : std_logic_vector(15 downto 0) := "0000000000000000";
 	signal data_ready : std_logic := '0';
 	signal input_sync_counter : unsigned(2 downto 0) := to_unsigned(0, 3);
 	
@@ -76,7 +77,7 @@ BEGIN
 					manchester_in <= test_manchester_code(i);
 					i <= i + 1;
 				end if;
-				if(i = 49) then i <= 0; end if;
+				if(i = 81) then i <= 0; end if;
 		end if;
 	end process manchester_gen;
 
