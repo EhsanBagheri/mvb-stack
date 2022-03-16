@@ -11,7 +11,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="22" />
+   <WVObjectSize size="24" />
    <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk_xx</obj_property>
       <obj_property name="ObjectShortName">clk_xx</obj_property>
@@ -67,6 +67,14 @@
    <wvobject fp_name="/testbench/tested_decoder/r_man_data_in_shift" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_man_data_in_shift[15:0]</obj_property>
       <obj_property name="ObjectShortName">r_man_data_in_shift[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_data_received" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_data_received[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_data_received[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_crc_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_crc_in[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_crc_in[7:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_message_length_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_message_length_counter[3:0]</obj_property>

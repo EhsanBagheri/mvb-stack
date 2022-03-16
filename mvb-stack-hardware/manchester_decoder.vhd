@@ -19,7 +19,7 @@ end e_MANCHESTER_DECODER;
 architecture Behavioral of e_MANCHESTER_DECODER is
 
 constant v_MVB_WORD_WIDTH : integer := 16;								-- MVB data word width is per industry standard 16 bits
-constant v_OVERSAMPLING_FACTOR : integer := 16;						-- oversampling factor
+constant v_OVERSAMPLING_FACTOR : integer := 16;							-- oversampling factor (USELESS, BIT TIME WILL BE MEASURED!!)
 constant v_SAMPLING_COUNTER_WIDTH : integer := 4;						-- width of the counter, based on which the sample enable signal is generated log2(OS_FACTOR)
 
 -- state machine constants:
@@ -45,6 +45,7 @@ signal r_MAN_DATA_IN_SHIFT : std_logic_vector(15 downto 0);							-- shift regis
 signal r_CURRENT_BIT_DECODED : std_logic;													-- non-manchester value of the latest manchester bit
 signal r_MESSAGE_LENGTH_COUNTER : unsigned(3 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
 signal s_MESSAGE_WORD_READY : std_logic := '0';											-- 16 bit word has been received on the manchester coded input
+signal r_DATA_RECEIVED : std_logic_vector(15 downto 0);								-- register that stores the complete DATA part of a frame (currently 16 bits only)
 
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
@@ -63,6 +64,10 @@ signal s_SAMPLE_AT_75 : std_logic := '1';
 signal r_START_DELIMITER_IN : std_logic_vector(15 downto 0) := "0000000000000000";	-- shift register receiving the start delimiter sequence at double bit rate
 signal r_START_DELIMITER_COUNTER : unsigned(4 downto 0) := to_unsigned(0, 5);			-- counter that measures how many bits of the start delimiter have been received (counts to 16)
 signal s_START_DELIMITER_VALUE_CHECK : std_logic_vector(1 downto 0) := "00";			-- wire to check validity and value of the delimiter		
+
+-- signals for receiving the 8 bit check sequence (CRC)
+signal r_CRC_IN : std_logic_vector(7 downto 0) := "00000000";						-- input shift register for the CRC
+signal s_CRC_READY : std_logic := '0';											-- '1' when the CRC is completely received
 
 -- state machine signals:
 signal r_STATE : std_logic_vector(2 downto 0) := "000";
@@ -189,6 +194,12 @@ begin
 	end case;
 end process p_START_DELIMITER_VALUE_CHECK;
 
+--_____________________________CRC RECEPTION_____________________________--
+-- CRC is already being received into r_MAN_DATA_IN_SHIFT, it will be saved to
+-- 	r_CRC_IN after the CRC reception state is over with
+s_CRC_READY <= '1' when ((r_MESSAGE_LENGTH_COUNTER = to_unsigned(7, 4))
+										and (r_STATE <= v_RECEIVE_CRC)) else '0';
+
 
 --_____________________________TRANSMISSION STATE MACHINE_____________________________--
 s_AT_RISING_EDGE <= '1' when (r_INPUT_BIT_TIME_SHIFT = "01") else '0';
@@ -227,10 +238,16 @@ begin
 				when "10"	=>		r_STATE <= v_RECEIVE_SLAVE;
 				when others =>		r_STATE <= v_IDLE;
 			end case;
-			elsif((r_STATE = v_RECEIVE_MASTER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) then
-			
+		elsif(((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE)) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) then
+			r_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save message before more manchester stuff is received
+			r_STATE <= v_RECEIVE_CRC;
+		elsif((r_STATE = v_RECEIVE_CRC) and (s_CRC_READY = '1')) then
+			r_CRC_IN <= r_MAN_DATA_IN_SHIFT(7 downto 0); -- save CRC before more manchester stuff is received [MSB!!]
+			r_STATE <= v_END_DELIMITER;
+		elsif((r_STATE = v_END_DELIMITER) and (manchester_in = '1')) then
+			r_STATE <= v_IDLE;
 		else
-			--r_STATE 	<= v_IDLE;
+			--r_STATE 	<= v_IDLE;			-- throw error maybe?
 		end if;
 	else
 	end if;
