@@ -93,7 +93,7 @@ begin
 			r_INPUT_EDGE_SHIFT <= "00";
 		elsif(s_SAMPLE_AT_25 = '1') then
 			r_INPUT_EDGE_SHIFT(1) <= manchester_in;
-		elsif(s_SAMPLE_AT_75 = '0') then
+		elsif(s_SAMPLE_AT_75 = '1') then
 			r_INPUT_EDGE_SHIFT(0) <= manchester_in;
 		else
 		end if;
@@ -127,22 +127,51 @@ begin
 	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
-			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
-		-- reset on the measured bit-width (-5 is needed, because the value read is delayed by two cycles, and the delay is doubled)
+			
+		-- reset on the measured bit-width (TODO)
 		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
-			r_MAN_DATA_IN_SHIFT(15 downto 0) <= (r_MAN_DATA_IN_SHIFT(14 downto 0) & r_CURRENT_BIT_DECODED);			-- MSB FIRST!!!
-			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
+		
 		elsif((s_DECODE_MANCHESTER = '1') or (r_STATE = v_START_DELIMITER)) then
 			r_SAMPLING_COUNTER <= r_SAMPLING_COUNTER + 1;
-		-- reset if there is nothing being decoded
+			
 		else
-			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+			
 		end if;
 	end if;	
 end process p_SAMPLING_COUNTER;
+
+-- shift register for incoming decoded bits
+p_DECODED_SHIFT : process(clk_xx)
+begin
+	if(rising_edge(clk_xx)) then
+		if(rst = '1') then
+			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
+			
+		-- shift on the measured bit-width (TODO)
+		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
+			r_MAN_DATA_IN_SHIFT(15 downto 0) <= (r_MAN_DATA_IN_SHIFT(14 downto 0) & r_CURRENT_BIT_DECODED);			-- MSB FIRST!!!
+			
+		-- reset if there is nothing being decoded
+		else
+			
+		end if;
+	end if;	
+end process p_DECODED_SHIFT;
+
+-- counter that counts the number of decoded bits in the current word
+p_MESSAGE_LENGTH_COUNTER : process(clk_xx)
+begin
+	if(rising_edge(clk_xx)) then
+		if(rst = '1') then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
+			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
+		elsif(r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4)) then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+		end if;
+	end if;
+end process p_MESSAGE_LENGTH_COUNTER;
 
 -- get edge direction of current bit, save value according to the manchester coding standard
 -- save the value of the sampling counter for synchronization purposes

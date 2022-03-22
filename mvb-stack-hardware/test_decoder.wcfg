@@ -11,18 +11,18 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="24" />
+   <WVObjectSize size="19" />
    <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk_xx</obj_property>
       <obj_property name="ObjectShortName">clk_xx</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/rst" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
    <wvobject fp_name="/testbench/manchester_in" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">manchester_in</obj_property>
       <obj_property name="ObjectShortName">manchester_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_sample_manchester_input" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_sample_manchester_input</obj_property>
+      <obj_property name="ObjectShortName">s_sample_manchester_input</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/s_sample_at_25" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_sample_at_25</obj_property>
@@ -31,10 +31,6 @@
    <wvobject fp_name="/testbench/tested_decoder/s_sample_at_75" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_sample_at_75</obj_property>
       <obj_property name="ObjectShortName">s_sample_at_75</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/tested_decoder/s_sample_manchester_input" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_sample_manchester_input</obj_property>
-      <obj_property name="ObjectShortName">s_sample_manchester_input</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_current_bit_decoded" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">r_current_bit_decoded</obj_property>
@@ -60,10 +56,6 @@
       <obj_property name="ElementShortName">s_at_edge</obj_property>
       <obj_property name="ObjectShortName">s_at_edge</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/tested_decoder/s_in_bit_middle" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_in_bit_middle</obj_property>
-      <obj_property name="ObjectShortName">s_in_bit_middle</obj_property>
-   </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_man_data_in_shift" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_man_data_in_shift[15:0]</obj_property>
       <obj_property name="ObjectShortName">r_man_data_in_shift[15:0]</obj_property>
@@ -79,18 +71,11 @@
    <wvobject fp_name="/testbench/tested_decoder/r_message_length_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_message_length_counter[3:0]</obj_property>
       <obj_property name="ObjectShortName">r_message_length_counter[3:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/s_message_word_ready" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_message_word_ready</obj_property>
       <obj_property name="ObjectShortName">s_message_word_ready</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/data_ready" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">data_ready</obj_property>
-      <obj_property name="ObjectShortName">data_ready</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/decoded_out" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">decoded_out[15:0]</obj_property>
-      <obj_property name="ObjectShortName">decoded_out[15:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_state" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_state[2:0]</obj_property>
@@ -104,9 +89,6 @@
    <wvobject fp_name="/testbench/tested_decoder/r_start_delimiter_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_start_delimiter_counter[4:0]</obj_property>
       <obj_property name="ObjectShortName">r_start_delimiter_counter[4:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/tested_decoder/s_start_delimiter_value_check" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">s_start_delimiter_value_check[1:0]</obj_property>
-      <obj_property name="ObjectShortName">s_start_delimiter_value_check[1:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
 </wave_config>

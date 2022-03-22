@@ -39,7 +39,7 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1647441717" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1647441717">
+    <transform xil_pn:end_ts="1647966894" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1647966894">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
@@ -57,25 +57,27 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1647441717" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1647441717">
+    <transform xil_pn:end_ts="1647966894" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1647966894">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
       <outfile xil_pn:name="test_manchester_decoder.vhd"/>
     </transform>
-    <transform xil_pn:end_ts="1647441724" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="1459423336703152140" xil_pn:start_ts="1647441717">
+    <transform xil_pn:end_ts="1647966898" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="1459423336703152140" xil_pn:start_ts="1647966894">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="fuse.log"/>
       <outfile xil_pn:name="isim"/>
+      <outfile xil_pn:name="isim.log"/>
       <outfile xil_pn:name="testbench_beh.prj"/>
       <outfile xil_pn:name="testbench_isim_beh.exe"/>
       <outfile xil_pn:name="xilinxsim.ini"/>
     </transform>
-    <transform xil_pn:end_ts="1647441724" xil_pn:in_ck="7130759491340027311" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="5406838117933684601" xil_pn:start_ts="1647441724">
+    <transform xil_pn:end_ts="1647966898" xil_pn:in_ck="-6246239964599215473" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="5406838117933684601" xil_pn:start_ts="1647966898">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <outfile xil_pn:name="isim.cmd"/>
+      <outfile xil_pn:name="isim.log"/>
       <outfile xil_pn:name="testbench_isim_beh.wdb"/>
     </transform>
   </transforms>
