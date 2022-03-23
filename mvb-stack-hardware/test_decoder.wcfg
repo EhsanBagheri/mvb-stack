@@ -11,7 +11,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="21" />
+   <WVObjectSize size="22" />
    <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk_xx</obj_property>
       <obj_property name="ObjectShortName">clk_xx</obj_property>
@@ -75,8 +75,8 @@
       <obj_property name="ObjectShortName">r_crc_in[7:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_message_length_counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_message_length_counter[3:0]</obj_property>
-      <obj_property name="ObjectShortName">r_message_length_counter[3:0]</obj_property>
+      <obj_property name="ElementShortName">r_message_length_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_message_length_counter[4:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/s_message_word_ready" type="logic" db_ref_id="1">
@@ -91,6 +91,10 @@
    <wvobject fp_name="/testbench/tested_decoder/r_start_delimiter_in" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_start_delimiter_in[15:0]</obj_property>
       <obj_property name="ObjectShortName">r_start_delimiter_in[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_end_of_end_delimiter" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_end_of_end_delimiter</obj_property>
+      <obj_property name="ObjectShortName">s_end_of_end_delimiter</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_start_delimiter_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_start_delimiter_counter[4:0]</obj_property>

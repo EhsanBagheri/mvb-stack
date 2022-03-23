@@ -25,7 +25,7 @@ ARCHITECTURE behavior OF testbench IS
 	-- constant test_manchester_code : std_logic_vector(21 downto 0) := "1001100101101010010110";	--random manchester code
 	-- constant test_manchester_code : std_logic_vector(49 downto 0) := "00000000000000001100011100010101010000000000000000";	--slave delim
 	-- constant test_manchester_code : std_logic_vector(49 downto 0) := "00000000000000001010100011100011010000000000000000";	-- master delim
-	constant test_manchester_code : std_logic_vector(81 downto 0) := "0000000000000000010110100101101001011010010110101010100011100011010000000000000000";	
+	constant test_manchester_code : std_logic_vector(93 downto 0) := "0000000011001010101010101010010110100101101001011010010110101010100011100011010000000000000000";	
 	signal i : integer := 0;
 	
 	signal clk_xx : std_logic := '0';
@@ -77,7 +77,7 @@ BEGIN
 					manchester_in <= test_manchester_code(i);
 					i <= i + 1;
 				end if;
-				if(i = 81) then i <= 0; end if;
+				if(i = 93) then i <= 0; end if;
 		end if;
 	end process manchester_gen;
 
