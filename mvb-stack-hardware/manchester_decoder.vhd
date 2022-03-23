@@ -19,8 +19,8 @@ end e_MANCHESTER_DECODER;
 architecture Behavioral of e_MANCHESTER_DECODER is
 
 constant v_MVB_WORD_WIDTH : integer := 16;								-- MVB data word width is per industry standard 16 bits
-constant v_OVERSAMPLING_FACTOR : integer := 16;							-- oversampling factor (USELESS, BIT TIME WILL BE MEASURED!!)
-constant v_SAMPLING_COUNTER_WIDTH : integer := 4;						-- width of the counter, based on which the sample enable signal is generated log2(OS_FACTOR)
+constant v_OVERSAMPLING_FACTOR : integer := 100;							-- oversampling factor (USELESS, BIT TIME WILL BE MEASURED!!)
+constant v_SAMPLING_COUNTER_WIDTH : integer := 16;						-- width of the counter, based on which the sample enable signal is generated log2(OS_FACTOR)
 
 -- state machine constants:
 constant v_IDLE : std_logic_vector(2 downto 0) := "000";
@@ -50,6 +50,7 @@ signal r_DATA_RECEIVED : std_logic_vector(15 downto 0);								-- register that 
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
 signal r_SAMPLING_COUNTER_AT_HALF_BIT : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(2**v_SAMPLING_COUNTER_WIDTH - 1, v_SAMPLING_COUNTER_WIDTH);		-- register to save counter value at edge for BT measurement
+signal r_NEXT_BIT_TIME : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0);			-- length of the next bit time
 signal s_IN_BIT_MIDDLE : std_logic := '0';												-- indicator signal that the transmission is between 25% BT and 75% BT, so an edge should be expected
 signal s_AT_EDGE : std_logic := '0';														-- indicator signal that an edge has been detected on r_INPUT_BIT_TIME_SHIFT
 
@@ -117,6 +118,8 @@ begin
 	-- detect edge in the middle of bit time
 	if((s_IN_BIT_MIDDLE = '1') and (s_AT_EDGE = '1')) then
 		r_SAMPLING_COUNTER_AT_HALF_BIT <= r_SAMPLING_COUNTER;
+	elsif ((r_STATE = v_START_BIT) and (s_AT_RISING_EDGE = '1')) then
+		r_SAMPLING_COUNTER_AT_HALF_BIT <= r_START_BIT_BIT_TIME/2;
 	end if;
 end process p_DETECT_BIT_TIME;
 
@@ -129,7 +132,11 @@ begin
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			
 		-- reset on the measured bit-width (TODO)
-		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
+		elsif(r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) then
+			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+			
+		-- reset sampling counter at the end of the start bit to be in sync with the bit stream
+		elsif((r_STATE = v_START_BIT) and (s_AT_RISING_EDGE = '1')) then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		
 		elsif((s_DECODE_MANCHESTER = '1') or (r_STATE = v_START_DELIMITER)) then
@@ -149,7 +156,7 @@ begin
 			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
 			
 		-- shift on the measured bit-width (TODO)
-		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
 			r_MAN_DATA_IN_SHIFT(15 downto 0) <= (r_MAN_DATA_IN_SHIFT(14 downto 0) & r_CURRENT_BIT_DECODED);			-- MSB FIRST!!!
 			
 		-- reset if there is nothing being decoded
@@ -165,10 +172,13 @@ begin
 	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
-		elsif((r_SAMPLING_COUNTER = to_unsigned(15, 4)) and (s_DECODE_MANCHESTER = '1')) then
+			
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
 			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
+			
 		elsif(r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4)) then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+			
 		end if;
 	end if;
 end process p_MESSAGE_LENGTH_COUNTER;
@@ -189,8 +199,8 @@ end process p_DECODE_BIT_VALUE;
 
 
 -- sample value at clk3 and clk11 (at 25% and 75%)
-s_SAMPLE_AT_25 <= '1' when (r_SAMPLING_COUNTER = to_unsigned(v_OVERSAMPLING_FACTOR/4, v_SAMPLING_COUNTER_WIDTH)) else '0';
-s_SAMPLE_AT_75 <= '1' when (r_SAMPLING_COUNTER = to_unsigned(v_OVERSAMPLING_FACTOR*3/4, v_SAMPLING_COUNTER_WIDTH)) else '0';
+s_SAMPLE_AT_25 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 / 4) else '0';
+s_SAMPLE_AT_75 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 * 3/4) else '0';
 s_SAMPLE_MANCHESTER_INPUT <= '1' when (s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 = '1') else '0';
 
 --_____________________________RECEIVE START DELIMITER_____________________________--
@@ -204,9 +214,11 @@ begin
 		if((r_STATE = v_START_DELIMITER) and ((s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 = '1'))) then
 			r_START_DELIMITER_IN <= (r_START_DELIMITER_IN(14 downto 0) & manchester_in);
 			r_START_DELIMITER_COUNTER <= r_START_DELIMITER_COUNTER + 1;
+			
 		elsif(r_STATE /= v_START_DELIMITER) then
 			r_START_DELIMITER_IN <= "0000000000000000";
 			r_START_DELIMITER_COUNTER <= to_unsigned(0, 5);
+			
 		else
 		end if;
 	else
@@ -254,12 +266,15 @@ begin
 	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
 			r_STATE <= v_IDLE;
+			
 		-- idle --> next rising edge is a start bit
 		elsif((r_STATE = v_IDLE) and (s_AT_RISING_EDGE = '1')) then
 			r_STATE <= v_START_BIT;
+			
 		-- start bit --> next rising edge is a start delimiter
 		elsif((r_STATE = v_START_BIT) and (s_AT_RISING_EDGE = '1')) then
 			r_STATE <= v_START_DELIMITER;
+			
 		-- if delimiter is valid, set its type, if it is not, return to idle
 		elsif((r_STATE = v_START_DELIMITER) and (r_START_DELIMITER_COUNTER = to_unsigned(16, 5))) then
 			case s_START_DELIMITER_VALUE_CHECK is
@@ -267,12 +282,15 @@ begin
 				when "10"	=>		r_STATE <= v_RECEIVE_SLAVE;
 				when others =>		r_STATE <= v_IDLE;
 			end case;
+			
 		elsif(((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE)) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) then
 			r_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save message before more manchester stuff is received
 			r_STATE <= v_RECEIVE_CRC;
+			
 		elsif((r_STATE = v_RECEIVE_CRC) and (s_CRC_READY = '1')) then
 			r_CRC_IN <= r_MAN_DATA_IN_SHIFT(7 downto 0); -- save CRC before more manchester stuff is received [MSB!!]
 			r_STATE <= v_END_DELIMITER;
+			
 		elsif((r_STATE = v_END_DELIMITER) and (manchester_in = '1')) then
 			r_STATE <= v_IDLE;
 		else

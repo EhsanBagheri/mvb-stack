@@ -11,7 +11,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="19" />
+   <WVObjectSize size="21" />
    <wvobject fp_name="/testbench/clk_xx" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk_xx</obj_property>
       <obj_property name="ObjectShortName">clk_xx</obj_property>
@@ -37,12 +37,18 @@
       <obj_property name="ObjectShortName">r_current_bit_decoded</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_sampling_counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_sampling_counter[3:0]</obj_property>
-      <obj_property name="ObjectShortName">r_sampling_counter[3:0]</obj_property>
+      <obj_property name="ElementShortName">r_sampling_counter[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_sampling_counter[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/s_decode_manchester" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">s_decode_manchester</obj_property>
+      <obj_property name="ObjectShortName">s_decode_manchester</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_sampling_counter_at_half_bit" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_sampling_counter_at_half_bit[3:0]</obj_property>
-      <obj_property name="ObjectShortName">r_sampling_counter_at_half_bit[3:0]</obj_property>
+      <obj_property name="ElementShortName">r_sampling_counter_at_half_bit[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_sampling_counter_at_half_bit[15:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/testbench/tested_decoder/r_input_edge_shift" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_input_edge_shift[1:0]</obj_property>
@@ -90,5 +96,9 @@
       <obj_property name="ElementShortName">r_start_delimiter_counter[4:0]</obj_property>
       <obj_property name="ObjectShortName">r_start_delimiter_counter[4:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testbench/tested_decoder/r_start_bit_bit_time" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_bit_bit_time[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_bit_bit_time[15:0]</obj_property>
    </wvobject>
 </wave_config>

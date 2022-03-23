@@ -34,7 +34,7 @@ ARCHITECTURE behavior OF testbench IS
 	signal manchester_in : std_logic := '0';
 	signal decoded_out : std_logic_vector(15 downto 0) := "0000000000000000";
 	signal data_ready : std_logic := '0';
-	signal input_sync_counter : unsigned(2 downto 0) := to_unsigned(0, 3);
+	signal input_sync_counter : unsigned(7 downto 0) := to_unsigned(0, 8);
 	
 	
 BEGIN
@@ -63,7 +63,7 @@ BEGIN
 	sending_sync : process (clk_xx)
 	begin
 		if(rising_edge(clk_xx)) then
-			if((input_sync_counter = to_unsigned(7, 3)) or (rst = '1')) then input_sync_counter <= to_unsigned(0, 3);
+			if((input_sync_counter = to_unsigned(50, 8)) or (rst = '1')) then input_sync_counter <= to_unsigned(0, 8);
 			else input_sync_counter <= input_sync_counter + 1;
 			end if;
 		end if;
@@ -73,7 +73,7 @@ BEGIN
 	manchester_gen : process (clk_xx)
 	begin
 		if(rst = '0') then
-				if(rising_edge(clk_xx) and (input_sync_counter = to_unsigned(0, 3))) then
+				if(rising_edge(clk_xx) and (input_sync_counter = to_unsigned(0, 8))) then
 					manchester_in <= test_manchester_code(i);
 					i <= i + 1;
 				end if;
