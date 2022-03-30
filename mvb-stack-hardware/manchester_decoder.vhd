@@ -14,7 +14,7 @@ entity e_MANCHESTER_DECODER is
 			  data_ready : out 			std_logic;								-- indicates that the decoded_out data is ready
 			  decode_error : out			std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
 			  );								
-end e_MANCHESTER_DECODER;
+end entity e_MANCHESTER_DECODER;
 
 architecture Behavioral of e_MANCHESTER_DECODER is
 
