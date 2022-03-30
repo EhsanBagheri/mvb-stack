@@ -40,10 +40,23 @@ constant v_SLAVE_DELIMITER : std_logic_vector(15 downto 0) := "1010100011100011"
 ---------------------- INTERNAL SIGNALS -----------------------
 ---------------------------------------------------------------
 
+--_____________________________SIGNALS THAT CARRY ACROSS TELEGRAMS_____________________________--
+--_____________________________OR ARE OTHERWISE INTERESTING OUTSIDE OF A FRAME_____________________________--
+
+-- value of last master frame message (for extracting function code for example)
+signal r_LAST_MASTER_MESSAGE : std_logic_vector(15 downto 0);						-- stores data from the last received master frame
+signal r_EXPECTED_SLAVE_MESSAGE_LENGTH : unsigned(8 downto 0);						-- stores length of next slave data from the last master frame (max 0 - 255 bits)
+
+-- value of last slave data (slave message needs to be stored)
+signal r_LAST_SLAVE_MESSAGE : std_logic_vector(255 downto 0);						-- stores the entirety of the latest valid slave data word
+signal r_LAST_SLAVE_DATA_CHUNK : std_logic_vector(63 downto 0);					-- stores the last valid 64 bit slave data chunk
+
+--_____________________________TEMPORARY SIGNALS FOR DECODING_____________________________--
+
 -- internal shift register for decoded input, value of current decoded bit
-signal r_MAN_DATA_IN_SHIFT : std_logic_vector(15 downto 0);							-- shift register storing serial input data, active during RECEIVE_MASTER or RECEIVE_SLAVE
+signal r_MAN_DATA_IN_SHIFT : std_logic_vector(63 downto 0);							-- shift register storing serial input data, active during RECEIVE_MASTER or RECEIVE_SLAVE
 signal r_CURRENT_BIT_DECODED : std_logic;													-- non-manchester value of the latest manchester bit
-signal r_MESSAGE_LENGTH_COUNTER : unsigned(4 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
+signal r_MESSAGE_LENGTH_COUNTER : unsigned(8 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
 signal s_MESSAGE_WORD_READY : std_logic := '0';											-- 16 bit word has been received on the manchester coded input
 signal r_DATA_RECEIVED : std_logic_vector(15 downto 0);								-- register that stores the complete DATA part of a frame (currently 16 bits only)
 
@@ -70,6 +83,16 @@ signal s_START_DELIMITER_VALUE_CHECK : std_logic_vector(1 downto 0) := "00";			-
 signal r_CRC_IN : std_logic_vector(7 downto 0) := "00000000";						-- input shift register for the CRC
 signal s_CRC_READY : std_logic := '0';														-- '1' when the CRC is completely received
 
+-- signals for calculating the reference CRC
+signal r_DIVISOR : unsigned(7 downto 0) := to_unsigned(229, 8);					-- x7 + x6 + x5 + x2 + 1 = 11100101
+signal r_CRC_INPUT_PADDED : unsigned(v_MVB_WORD_WIDTH-1 + 7 downto 0);			-- data word padded for check sequence calculation
+signal r_CRC_INPUT_PADDED_READY : std_logic := '0';
+signal r_CRC_CALCULATED : std_logic_vector(7 downto 0);								-- end result of the calculated CRC, will be compared with the received CRC
+signal r_LAST_CRC_VALID : std_logic := '0';												-- 1, when the last received frame carried valid data
+signal s_RECEIVED_MESSAGE_READY : std_logic := '0';									-- is 1, when the master or slave data has been received
+signal s_CRC_EVEN_PARITY_BIT : std_logic := '0';										-- last bit of CRC is an even parity bit
+signal r_CRC_CALCULATED_READY : std_logic := '0';
+
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
 signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when an end delimiter is closed with a falling edge
 
@@ -79,6 +102,7 @@ signal s_AT_RISING_EDGE : std_logic := '0';												-- 1 if a rising edge is 
 signal s_AT_FALLING_EDGE : std_logic := '0';												-- 1 if a falling edge is detected (-||-)
 signal r_START_BIT_BIT_TIME : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);		-- counter to measure the half bit time of the start bit
 signal s_DECODE_MANCHESTER : std_logic := '0';											-- only decode manchester signal if either data or CRC is being received
+signal r_CURRENT_MESSAGE_IS_MASTER : std_logic := '0';								-- is one if the decoder is currently receiving a master frame
 
 ---------------------------------------------------------------
 ------------------- BEHAVIORAL DESCRIPTION --------------------
@@ -87,7 +111,7 @@ begin
 
 --_____________________________DECODE MANCHESTER CODE_____________________________--
 s_DECODE_MANCHESTER <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE) or (r_STATE = v_RECEIVE_CRC)) else '0';
-s_MESSAGE_WORD_READY <= '1' when (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4)) else '0';
+s_MESSAGE_WORD_READY <= '1' when (r_MESSAGE_LENGTH_COUNTER = to_unsigned(16, 9)) else '0';
 
 -- get input bit into shift register on every sample enable signal (bit value detection)
 p_DETECT_IN_BIT_STATE_CHANGE : process(clk_xx)
@@ -159,12 +183,14 @@ p_DECODED_SHIFT : process(clk_xx)
 begin
 	if(rising_edge(clk_xx)) then
 		if(rst = '1') then
-			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
+			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000000000000000000000000000000000000000000000000000";
 			
 		-- shift on the measured bit-width (TODO)
 		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
 			r_MAN_DATA_IN_SHIFT(15 downto 0) <= (r_MAN_DATA_IN_SHIFT(14 downto 0) & r_CURRENT_BIT_DECODED);			-- MSB FIRST!!!
-			
+		
+		elsif(r_STATE = v_END_DELIMITER) then
+			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000000000000000000000000000000000000000000000000000";
 		--
 		else
 			
@@ -252,6 +278,36 @@ end process p_START_DELIMITER_VALUE_CHECK;
 s_CRC_READY <= '1' when ((r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 4))
 										and (r_STATE = v_RECEIVE_CRC)) else '0';
 										
+--_____________________________CRC CALCULATION_____________________________--
+s_RECEIVED_MESSAGE_READY <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE)) and 
+		(r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) else '0';
+		
+-- parity bit can be calculated via cascaded xor gates (zero padding doesn't change parity)
+s_CRC_EVEN_PARITY_BIT <= xor std_logic_vector(r_CRC_INPUT_PADDED, v_MVB_WORD_WIDTH+7);
+
+p_CRC_CALCULATION : process(clk_xx)
+begin
+	if(rising_edge(clk)) then
+		if(rst = '1') then
+			r_DIVISOR <= to_unsigned(229, 8);
+			r_CRC_INPUT_PADDED_READY <= '0';
+		elsif(s_RECEIVED_MESSAGE_READY = '1') then
+			r_CRC_INPUT_PADDED <= to_unsigned(r_MAN_DATA_IN_SHIFT(15 downto 0) & "0000000", v_MVB_WORD_WIDTH+7);
+			r_CRC_INPUT_PADDED_READY <= '1';
+		elsif(r_CRC_INPUT_PADDED_READY = '1') then
+			r_CRC_CALCULATED <= std_logic_vector(r_CRC_INPUT_PADDED / r_DIVISOR, 7) & s_CRC_EVEN_PARITY_BIT;
+			r_CRC_INPUT_PADDED_READY <= '0';
+			r_CRC_CALCULATED_READY <= '1';
+		elsif((r_CRC_CALCULATED_READY = '1') and (s_CRC_READY = '1')) then
+			if(r_MAN_DATA_IN_SHIFT(7 downto 0) = r_CRC_CALCULATED) then
+				r_LAST_CRC_VALID <= '1';
+			else
+				r_LAST_CRC_VALID <= '0';
+			end if;
+		end if;
+	end if;
+end process p_CRC_CALCULATION;
+										
 --_____________________________END DELIMITER RECEPTION_____________________________--
 -- the end delimiter is for EMD 1 BT LOW and 1 BT HIGH, emitted by whatever device
 --		is currently sending data onto the bus. Therefore the end delimiter ends at the next falling edge.
@@ -294,13 +350,22 @@ begin
 		-- if delimiter is valid, set its type, if it is not, return to idle (have to wait until the current cycle is finished or the reception will begin too early)
 		elsif((r_STATE = v_START_DELIMITER) and (r_START_DELIMITER_COUNTER = to_unsigned(16, 5)) and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
 			case s_START_DELIMITER_VALUE_CHECK is
-				when "01"	=>		r_STATE <= v_RECEIVE_MASTER;
-				when "10"	=>		r_STATE <= v_RECEIVE_SLAVE;
-				when others =>		r_STATE <= v_IDLE;
+				when "01"	=>		
+					r_STATE <= v_RECEIVE_MASTER;
+					r_CURRENT_MESSAGE_IS_MASTER <= '1';
+				when "10"	=>		
+					r_STATE <= v_RECEIVE_SLAVE;
+					r_CURRENT_MESSAGE_IS_MASTER <= '0';
+				when others =>		
+					r_STATE <= v_IDLE;
 			end case;
 			
-		elsif(((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE)) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
-			r_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save message before more manchester stuff is received
+		elsif((r_STATE = v_RECEIVE_MASTER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+			r_LAST_MASTER_MESSAGE <= r_MAN_DATA_IN_SHIFT(15 downto 0);		-- save message before more manchester stuff is received
+			r_STATE <= v_RECEIVE_CRC;
+			
+		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+			r_LAST_SLAVE_DATA_CHUNK <= r_MAN_DATA_IN_SHIFT;		-- save message before more manchester stuff is received
 			r_STATE <= v_RECEIVE_CRC;
 			
 		elsif((r_STATE = v_RECEIVE_CRC) and (s_CRC_READY = '1') and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
@@ -309,6 +374,7 @@ begin
 			
 		elsif((r_STATE = v_END_DELIMITER) and (s_END_OF_END_DELIMITER = '1')) then
 			r_STATE <= v_IDLE;
+			
 		else
 			--r_STATE 	<= v_IDLE;			-- throw error maybe?
 		end if;
@@ -316,9 +382,28 @@ begin
 	end if;
 end process p_TRANSMISSION_STATE_MACHINE;
 
+--_____________________________DETERMINE EXPECTED MESSAGE LENGTH_____________________________--
 
-
-
+-- whenever r_LAST_MASTER_MESSAGE changes, a slave frame will be expected, with a length determined in the F-code
+p_DETERMINDE_NEXT_MESSAGE_LENGTH : process(r_LAST_MASTER_MESSAGE)
+begin
+	case r_LAST_MASTER_MESSAGE(15 downto 12) is
+		when "0000" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		when "0001" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(32, 9);
+		when "0010" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(64, 9);
+		when "0011" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(128, 9);
+		when "0100" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(256, 9);
+		when "1000" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		when "1001" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		when "1100" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(256, 9);
+		when "1101" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		when "1110" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		when "1111" => r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+		
+		when others =>  r_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 9);
+	
+	end case;
+end process p_DETERMINDE_NEXT_MESSAGE_LENGTH;
 
 
 
