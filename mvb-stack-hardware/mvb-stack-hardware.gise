@@ -58,6 +58,7 @@
       <status xil_pn:value="ReadyToRun"/>
       <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648649820" xil_pn:in_ck="6290240502050360745" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1648649820">
       <status xil_pn:value="SuccessfullyRun"/>
