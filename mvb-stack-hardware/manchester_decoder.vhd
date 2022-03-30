@@ -35,6 +35,17 @@ constant v_END_DELIMITER : std_logic_vector(2 downto 0) := "110";
 constant v_MASTER_DELIMITER : std_logic_vector(15 downto 0) := "1100011100010101";
 constant v_SLAVE_DELIMITER : std_logic_vector(15 downto 0) := "1010100011100011";
 
+------------------------------------------------------------------
+---------------------- EXTERNAL COMPONENTS -----------------------
+------------------------------------------------------------------
+
+component e_EVEN_PARITY_BIT_EMITTER is
+	Port(	
+		input_vector :	in			 std_logic_vector(6 downto 0);
+		parity_bit	 :	out		 std_logic
+		);
+end component e_EVEN_PARITY_BIT_EMITTER;
+
 
 ---------------------------------------------------------------
 ---------------------- INTERNAL SIGNALS -----------------------
@@ -91,6 +102,7 @@ signal r_CRC_CALCULATED : std_logic_vector(7 downto 0);								-- end result of 
 signal r_LAST_CRC_VALID : std_logic := '0';												-- 1, when the last received frame carried valid data
 signal s_RECEIVED_MESSAGE_READY : std_logic := '0';									-- is 1, when the master or slave data has been received
 signal s_CRC_EVEN_PARITY_BIT : std_logic := '0';										-- last bit of CRC is an even parity bit
+signal s_DIVISION_RESULT : unsigned(6 downto 0);										-- result of the division
 signal r_CRC_CALCULATED_READY : std_logic := '0';
 
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
@@ -282,8 +294,13 @@ s_CRC_READY <= '1' when ((r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 4))
 s_RECEIVED_MESSAGE_READY <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RECEIVE_SLAVE)) and 
 		(r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) else '0';
 		
--- parity bit can be calculated via cascaded xor gates (zero padding doesn't change parity)
-s_CRC_EVEN_PARITY_BIT <= xor std_logic_vector(r_CRC_INPUT_PADDED, v_MVB_WORD_WIDTH+7);
+s_DIVISION_RESULT <= r_CRC_INPUT_PADDED / r_DIVISOR;
+		
+-- calculate an even parity bit for the CRC (via cascaded xor gates)
+calculate_parity_bit : e_EVEN_PARITY_BIT_EMITTER port map(
+	input_vector => std_logic_vector(s_DIVISION_RESULT, 7),
+	parity_bit => s_CRC_EVEN_PARITY_BIT
+);
 
 p_CRC_CALCULATION : process(clk_xx)
 begin
@@ -291,13 +308,19 @@ begin
 		if(rst = '1') then
 			r_DIVISOR <= to_unsigned(229, 8);
 			r_CRC_INPUT_PADDED_READY <= '0';
+			
+		-- wait until the data word has arrived in its entirety, then execute padding
 		elsif(s_RECEIVED_MESSAGE_READY = '1') then
 			r_CRC_INPUT_PADDED <= to_unsigned(r_MAN_DATA_IN_SHIFT(15 downto 0) & "0000000", v_MVB_WORD_WIDTH+7);
 			r_CRC_INPUT_PADDED_READY <= '1';
+			
+		-- wait until the input has been zero-padded, then calculate CRC
 		elsif(r_CRC_INPUT_PADDED_READY = '1') then
-			r_CRC_CALCULATED <= std_logic_vector(r_CRC_INPUT_PADDED / r_DIVISOR, 7) & s_CRC_EVEN_PARITY_BIT;
+			r_CRC_CALCULATED <= std_logic_vector(s_DIVISION_RESULT, 7) & s_CRC_EVEN_PARITY_BIT;
 			r_CRC_INPUT_PADDED_READY <= '0';
 			r_CRC_CALCULATED_READY <= '1';
+			
+		-- wait until the CRC is calculated and received, then check the validity of the received CRC
 		elsif((r_CRC_CALCULATED_READY = '1') and (s_CRC_READY = '1')) then
 			if(r_MAN_DATA_IN_SHIFT(7 downto 0) = r_CRC_CALCULATED) then
 				r_LAST_CRC_VALID <= '1';
