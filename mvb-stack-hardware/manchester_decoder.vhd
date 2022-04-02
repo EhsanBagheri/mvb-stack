@@ -6,13 +6,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity e_MANCHESTER_DECODER is
-    Port ( clk_xx : in  				std_logic;								-- 16x clock input for clock recovery and oversampling
-			  rst : in 						std_logic;
-			  rdn : in 						std_logic;								-- control signal initiates read operation
-           manchester_in : in  		std_logic;								-- incoming serial manchester-coded data
-           decoded_out : out  		std_logic_vector(15 downto 0);	-- outgoing data word
-			  data_ready : out 			std_logic;								-- indicates that the decoded_out data is ready
-			  decode_error : out			std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
+    Port ( clk 				: 	in  		std_logic;								-- 16x clock input for clock recovery and oversampling
+			  rst 				:	in 		std_logic;
+			  rdn 				: 	in 		std_logic;								-- control signal initiates read operation
+           manchester_in 	: 	in  		std_logic;								-- incoming serial manchester-coded data
+           decoded_out 		: 	out  		std_logic_vector(15 downto 0);	-- outgoing data word
+			  data_ready 		: 	out 		std_logic;								-- indicates that the decoded_out data is ready
+			  decode_error 	: 	out		std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
 			  );								
 end e_MANCHESTER_DECODER;
 
@@ -90,9 +90,9 @@ s_DECODE_MANCHESTER <= '1' when ((r_STATE = v_RECEIVE_MASTER) or (r_STATE = v_RE
 s_MESSAGE_WORD_READY <= '1' when (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4)) else '0';
 
 -- get input bit into shift register on every sample enable signal (bit value detection)
-p_DETECT_IN_BIT_STATE_CHANGE : process(clk_xx)
+p_DETECT_IN_BIT_STATE_CHANGE : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_INPUT_EDGE_SHIFT <= "00";
 		elsif(s_SAMPLE_AT_25 = '1') then
@@ -109,9 +109,9 @@ end process p_DETECT_IN_BIT_STATE_CHANGE;
 s_IN_BIT_MIDDLE <= '1' when ((r_SAMPLING_COUNTER > r_SAMPLING_COUNTER_AT_HALF_BIT*2 / 4) and (r_SAMPLING_COUNTER < r_SAMPLING_COUNTER_AT_HALF_BIT*2 * 3/4)) else '0';
 s_AT_EDGE <= '1' when ((r_INPUT_BIT_TIME_SHIFT = "10") or (r_INPUT_BIT_TIME_SHIFT = "01")) else '0';
 
-p_DETECT_BIT_TIME : process(clk_xx)
+p_DETECT_BIT_TIME : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_INPUT_BIT_TIME_SHIFT <= "00";
 		else
@@ -131,9 +131,9 @@ end process p_DETECT_BIT_TIME;
 
 -- create counter, based on which sampling times can be determined,
 -- 	save currently decoded bit value when the read cycle comes to an end (MSB FIRST)
-p_SAMPLING_COUNTER : process(clk_xx)
+p_SAMPLING_COUNTER : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			
@@ -155,9 +155,9 @@ begin
 end process p_SAMPLING_COUNTER;
 
 -- shift register for incoming decoded bits
-p_DECODED_SHIFT : process(clk_xx)
+p_DECODED_SHIFT : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_MAN_DATA_IN_SHIFT(15 downto 0) <= "0000000000000000";
 			
@@ -175,9 +175,9 @@ end process p_DECODED_SHIFT;
 -- counter that counts the number of decoded bits in the current word
 --		it actually counts how many shifts have happened, therefore it needs to be reset at 16 and not 15
 --		in the case of the message as well as 8 and not seven in the case of the CRC
-p_MESSAGE_LENGTH_COUNTER : process(clk_xx)
+p_MESSAGE_LENGTH_COUNTER : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
 			
@@ -219,9 +219,9 @@ s_SAMPLE_MANCHESTER_INPUT <= '1' when (s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 
 --		manchester coding is ignored, and the delimiter is treated as a single 16 bit sequence.
 -- The validity of the received sequence is checked after the full transmission, by the state machine.
 
-p_RECEIVE_START_DELIMITER : process(clk_xx)
+p_RECEIVE_START_DELIMITER : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if((r_STATE = v_START_DELIMITER) and ((s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 = '1'))) then
 			r_START_DELIMITER_IN <= (r_START_DELIMITER_IN(14 downto 0) & manchester_in);
 			r_START_DELIMITER_COUNTER <= r_START_DELIMITER_COUNTER + 1;
@@ -262,9 +262,9 @@ s_AT_RISING_EDGE <= '1' when (r_INPUT_BIT_TIME_SHIFT = "01") else '0';
 s_AT_FALLING_EDGE <= '1' when (r_INPUT_BIT_TIME_SHIFT = "10") else '0';
 
 -- how many cycles does the start bit last?
-p_MEASURE_INITIAL_BIT_TIME : process(clk_xx)
+p_MEASURE_INITIAL_BIT_TIME : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		elsif(r_STATE = v_START_BIT) then
@@ -277,15 +277,17 @@ begin
 end process p_MEASURE_INITIAL_BIT_TIME;
 
 
-p_TRANSMISSION_STATE_MACHINE : process(clk_xx)
+p_TRANSMISSION_STATE_MACHINE : process(clk)
 begin
-	if(rising_edge(clk_xx)) then
+	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_STATE <= v_IDLE;
+			data_ready <= '0';
 			
 		-- idle --> next rising edge is a start bit
 		elsif((r_STATE = v_IDLE) and (s_AT_RISING_EDGE = '1')) then
 			r_STATE <= v_START_BIT;
+			data_ready <= '0';
 			
 		-- start bit --> next rising edge is a start delimiter
 		elsif((r_STATE = v_START_BIT) and (s_AT_RISING_EDGE = '1')) then
@@ -309,6 +311,8 @@ begin
 			
 		elsif((r_STATE = v_END_DELIMITER) and (s_END_OF_END_DELIMITER = '1')) then
 			r_STATE <= v_IDLE;
+			data_ready <= '0';
+			decoded_out <= r_DATA_RECEIVED;
 		else
 			--r_STATE 	<= v_IDLE;			-- throw error maybe?
 		end if;

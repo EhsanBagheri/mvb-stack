@@ -24,6 +24,7 @@
   <files xmlns="http://www.xilinx.com/XMLSchema">
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="e_MANCHESTER_DECODER_isim_beh.exe"/>
     <file xil_pn:fileType="FILE_LOG" xil_pn:name="fuse.log"/>
+    <file xil_pn:fileType="FILE_LOG" xil_pn:name="ipcore_dir/coregen.log"/>
     <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="isim"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_CMD" xil_pn:name="isim.cmd"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_LOG" xil_pn:name="isim.log"/>
@@ -39,12 +40,15 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1648019298" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1648019298">
+    <transform xil_pn:end_ts="1648736568" xil_pn:in_ck="-7202183836918569654" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1648736568">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
       <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
       <status xil_pn:value="InputAdded"/>
       <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
+      <outfile xil_pn:name="even_parity_bit_emitter.vhd"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
       <outfile xil_pn:name="test_manchester_decoder.vhd"/>
     </transform>
@@ -56,16 +60,22 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1647079173" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="-5196611795869365632" xil_pn:start_ts="1647079173">
+    <transform xil_pn:end_ts="1648736568" xil_pn:in_ck="-5111980336448411813" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="-5196611795869365632" xil_pn:start_ts="1648736568">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
+      <outfile xil_pn:name="ipcore_dir/fifo0.ngc"/>
+      <outfile xil_pn:name="ipcore_dir/fifo0.vhd"/>
     </transform>
     <transform xil_pn:end_ts="1648019298" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1648019298">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
       <outfile xil_pn:name="test_manchester_decoder.vhd"/>
     </transform>
@@ -76,6 +86,7 @@
       <status xil_pn:value="OutOfDateForProperties"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
       <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputChanged"/>
       <outfile xil_pn:name="fuse.log"/>
       <outfile xil_pn:name="isim"/>
       <outfile xil_pn:name="isim.log"/>
