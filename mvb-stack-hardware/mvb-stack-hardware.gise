@@ -22,17 +22,39 @@
   <sourceproject xmlns="http://www.xilinx.com/XMLSchema" xil_pn:fileType="FILE_XISE" xil_pn:name="mvb-stack-hardware.xise"/>
 
   <files xmlns="http://www.xilinx.com/XMLSchema">
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="_ngo"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/xst.xmsgs"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="e_MANCHESTER_DECODER_isim_beh.exe"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGDBUILD_LOG" xil_pn:name="e_MANCHESTER_ENCODER.bld"/>
+    <file xil_pn:fileType="FILE_CMD_LOG" xil_pn:name="e_MANCHESTER_ENCODER.cmd_log"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_LSO" xil_pn:name="e_MANCHESTER_ENCODER.lso"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGC" xil_pn:name="e_MANCHESTER_ENCODER.ngc"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGD" xil_pn:name="e_MANCHESTER_ENCODER.ngd"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGR" xil_pn:name="e_MANCHESTER_ENCODER.ngr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="e_MANCHESTER_ENCODER.prj"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_STX" xil_pn:name="e_MANCHESTER_ENCODER.stx"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_REPORT" xil_pn:name="e_MANCHESTER_ENCODER.syr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST" xil_pn:name="e_MANCHESTER_ENCODER.xst"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="e_MANCHESTER_ENCODER_ngdbuild.xrpt"/>
+    <file xil_pn:fileType="FILE_HTML" xil_pn:name="e_MANCHESTER_ENCODER_summary.html"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="e_MANCHESTER_ENCODER_xst.xrpt"/>
     <file xil_pn:fileType="FILE_LOG" xil_pn:name="fuse.log"/>
     <file xil_pn:fileType="FILE_LOG" xil_pn:name="ipcore_dir/coregen.log"/>
     <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="isim"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_CMD" xil_pn:name="isim.cmd"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_LOG" xil_pn:name="isim.log"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="manchester_decoder_isim_beh.exe"/>
+    <file xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="test_manchester_encoder_beh.prj"/>
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="test_manchester_encoder_isim_beh.exe"/>
+    <file xil_pn:fileType="FILE_ISIM_MISC" xil_pn:name="test_manchester_encoder_isim_beh.wdb"/>
     <file xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="testbench_beh.prj"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="testbench_isim_beh.exe"/>
     <file xil_pn:fileType="FILE_ISIM_MISC" xil_pn:name="testbench_isim_beh.wdb"/>
+    <file xil_pn:fileType="FILE_FITTER_REPORT" xil_pn:name="webtalk_pn.xml"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_INI" xil_pn:name="xilinxsim.ini"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xlnx_auto_0_xdb"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xst"/>
   </files>
 
   <transforms xmlns="http://www.xilinx.com/XMLSchema">
@@ -40,72 +62,118 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1648736568" xil_pn:in_ck="-7202183836918569654" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1648736568">
+    <transform xil_pn:end_ts="1648907901" xil_pn:in_ck="3131006471017111943" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1648907901">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="OutOfDateForOutputs"/>
-      <status xil_pn:value="InputAdded"/>
-      <status xil_pn:value="InputChanged"/>
-      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="even_parity_bit_emitter.vhd"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
+      <outfile xil_pn:name="manchester_encoder.vhd"/>
+      <outfile xil_pn:name="test_even_parity_bit_emitter.vhd"/>
       <outfile xil_pn:name="test_manchester_decoder.vhd"/>
+      <outfile xil_pn:name="test_manchester_encoder.vhd"/>
     </transform>
-    <transform xil_pn:end_ts="1647080709" xil_pn:name="TRAN_xawsToSimhdl" xil_pn:prop_ck="4434870115928851094" xil_pn:start_ts="1647080709">
+    <transform xil_pn:end_ts="1648907621" xil_pn:name="TRAN_xawsToSimhdl" xil_pn:prop_ck="9184696845300216926" xil_pn:start_ts="1648907621">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1647080709" xil_pn:name="TRAN_schematicsToHdlSim" xil_pn:prop_ck="-1902104842233773292" xil_pn:start_ts="1647080709">
+    <transform xil_pn:end_ts="1648907621" xil_pn:name="TRAN_schematicsToHdlSim" xil_pn:prop_ck="6317588594561877212" xil_pn:start_ts="1648907621">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1648736568" xil_pn:in_ck="-5111980336448411813" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="-5196611795869365632" xil_pn:start_ts="1648736568">
+    <transform xil_pn:end_ts="1648903796" xil_pn:in_ck="-5111980336448411813" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="6110993199679611818" xil_pn:start_ts="1648903796">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForProperties"/>
       <outfile xil_pn:name="ipcore_dir/fifo0.ngc"/>
       <outfile xil_pn:name="ipcore_dir/fifo0.vhd"/>
     </transform>
-    <transform xil_pn:end_ts="1648019298" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1648019298">
+    <transform xil_pn:end_ts="1648907901" xil_pn:in_ck="3131006471017111943" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1648907901">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="OutOfDateForPredecessor"/>
-      <status xil_pn:value="OutOfDateForOutputs"/>
-      <status xil_pn:value="InputAdded"/>
-      <status xil_pn:value="InputChanged"/>
-      <status xil_pn:value="OutputChanged"/>
+      <outfile xil_pn:name="even_parity_bit_emitter.vhd"/>
       <outfile xil_pn:name="manchester_decoder.vhd"/>
+      <outfile xil_pn:name="manchester_encoder.vhd"/>
+      <outfile xil_pn:name="test_even_parity_bit_emitter.vhd"/>
       <outfile xil_pn:name="test_manchester_decoder.vhd"/>
+      <outfile xil_pn:name="test_manchester_encoder.vhd"/>
     </transform>
-    <transform xil_pn:end_ts="1648019302" xil_pn:in_ck="-297960332828944899" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="1459423336703152140" xil_pn:start_ts="1648019298">
+    <transform xil_pn:end_ts="1648907906" xil_pn:in_ck="-1360332459149016518" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="-8440131264768516196" xil_pn:start_ts="1648907901">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="OutOfDateForProperties"/>
-      <status xil_pn:value="OutOfDateForPredecessor"/>
-      <status xil_pn:value="InputAdded"/>
-      <status xil_pn:value="InputChanged"/>
       <outfile xil_pn:name="fuse.log"/>
       <outfile xil_pn:name="isim"/>
       <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="testbench_beh.prj"/>
-      <outfile xil_pn:name="testbench_isim_beh.exe"/>
+      <outfile xil_pn:name="test_manchester_encoder_beh.prj"/>
+      <outfile xil_pn:name="test_manchester_encoder_isim_beh.exe"/>
       <outfile xil_pn:name="xilinxsim.ini"/>
     </transform>
-    <transform xil_pn:end_ts="1648019303" xil_pn:in_ck="-6246239964599215473" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="5406838117933684601" xil_pn:start_ts="1648019302">
+    <transform xil_pn:end_ts="1648907907" xil_pn:in_ck="-8565106813062566394" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="-492253534921656247" xil_pn:start_ts="1648907906">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForProperties"/>
-      <status xil_pn:value="OutOfDateForPredecessor"/>
       <outfile xil_pn:name="isim.cmd"/>
       <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="testbench_isim_beh.wdb"/>
+      <outfile xil_pn:name="test_manchester_encoder_isim_beh.wdb"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:name="TRAN_copyInitialToXSTAbstractSynthesis" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:name="TRAN_schematicsToHdl" xil_pn:prop_ck="4415005542930855470" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:in_ck="-5111980336448411813" xil_pn:name="TRAN_regenerateCores" xil_pn:prop_ck="6110993199679611818" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="ipcore_dir/fifo0.ngc"/>
+      <outfile xil_pn:name="ipcore_dir/fifo0.vhd"/>
     </transform>
     <transform xil_pn:name="TRAN_SubProjectAbstractToPreProxy">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:name="TRAN_xawsTohdl" xil_pn:prop_ck="-431416470884858192" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:in_ck="-2674654439411618518" xil_pn:name="TRAN_SubProjectPreToStructuralProxy" xil_pn:prop_ck="-5609353908610680735" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904277" xil_pn:name="TRAN_platgen" xil_pn:prop_ck="-8052153510967189516" xil_pn:start_ts="1648904277">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648906821" xil_pn:in_ck="-3347807884646597336" xil_pn:name="TRANEXT_xstsynthesize_spartan6" xil_pn:prop_ck="8118868048180916611" xil_pn:start_ts="1648906813">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="WarningsGenerated"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <outfile xil_pn:name="_xmsgs/xst.xmsgs"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.lso"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.ngc"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.ngr"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.prj"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.stx"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.syr"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.xst"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER_xst.xrpt"/>
+      <outfile xil_pn:name="webtalk_pn.xml"/>
+      <outfile xil_pn:name="xst"/>
+    </transform>
+    <transform xil_pn:end_ts="1648904285" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="6883790743207268581" xil_pn:start_ts="1648904285">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1648906826" xil_pn:in_ck="8002306738615366332" xil_pn:name="TRANEXT_ngdbuild_FPGA" xil_pn:prop_ck="5357270601275557109" xil_pn:start_ts="1648906821">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <outfile xil_pn:name="_ngo"/>
+      <outfile xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.bld"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER.ngd"/>
+      <outfile xil_pn:name="e_MANCHESTER_ENCODER_ngdbuild.xrpt"/>
     </transform>
   </transforms>
 

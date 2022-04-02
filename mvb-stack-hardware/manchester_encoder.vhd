@@ -11,7 +11,7 @@ entity e_MANCHESTER_ENCODER is
 		clk						:	in			std_logic;
 		rst						:	in			std_logic;
 		start_transmission 	:	in			std_logic;								-- should be a single clock period long pulse
-		data_length				:	in			unsigned(3 downto 0); 				-- how many times 16 bits?
+		data_length				:	in			std_logic_vector(3 downto 0); 	-- how many times 16 bits?
 		--
 		din						:	in			std_logic_vector(7 downto 0);		-- input data in 8 bit data words (will be stored in FIFO)
 		wr_en						: 	in			std_logic;								-- FIFO write enable signal, when active, din will be saved to FIFO
@@ -40,6 +40,24 @@ constant v_END_DELIMITER : std_logic_vector(2 downto 0) := "101";
 constant v_MASTER_DELIMITER : std_logic_vector(15 downto 0) := "1100011100010101";
 constant v_SLAVE_DELIMITER : std_logic_vector(15 downto 0) := "1010100011100011";
 
+---------------------------------------------------------------------
+---------------------- THIRD PARTY COMPONENTS -----------------------
+---------------------------------------------------------------------
+
+
+COMPONENT fifo0
+  PORT (
+    clk : IN STD_LOGIC;
+    rst : IN STD_LOGIC;
+    din : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+    wr_en : IN STD_LOGIC;
+    rd_en : IN STD_LOGIC;
+    dout : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+    full : OUT STD_LOGIC;
+    empty : OUT STD_LOGIC
+  );
+END COMPONENT;
+
 ---------------------------------------------------------------
 ---------------------- INTERNAL SIGNALS -----------------------
 ---------------------------------------------------------------
@@ -62,7 +80,7 @@ signal s_AT_FULL_BT	:	std_logic;
 signal r_OUT_SHIFT	:	std_logic_vector(17 downto 0);			-- shift register containing the current message vector (MSB <-- LSB)
 signal r_ENCODED_OUT_SHIFT	:	std_logic_vector(1 downto 0);		-- mini shift register, containing a single manchester coded bit
 signal r_MESSAGE_LENGTH_COUNTER	:	unsigned(3 downto 0);		-- how many times has r_OUT_SHIFT been shifted since the last bit of data has been loaded
-signal r_DATA_LENGTH_COUNTER	:	unsigned(3 downto 0);			-- how many times 16 bits does the messaged data word contain?
+signal r_DATA_LENGTH_COUNTER	:	unsigned(7 downto 0);			-- how many times 16 bits does the messaged data word contain?
 signal s_RESET_MLC	:	std_logic;										-- 1 when the transmission is about to reach a new chunk of message (always new state except when emitting data message)
 signal s_ENCODE_MANCHESTER	:	std_logic;								-- does the data word in r_OUT_SHIFT need to be manchester encoded?
 
@@ -75,7 +93,7 @@ begin
 ----------------------------------------------------------------
 
 -- adding FIFO memory for 8 bit input data
-FIFO : wrapped_fifo0
+FIFO : fifo0
   PORT MAP (
     clk => clk,
     rst => rst,
@@ -113,24 +131,24 @@ begin
 end process p_BIT_TIME_COUNTER;
 
 --_____________________________TRANSMISSION SCHEDULING_____________________________--
-s_RESET_MLC <= '1' when	((r_STATE = v_START_BIT) and (p_MESSAGE_LENGTH_COUNTER = to_unsigned(1, 4))) or
-								((r_STATE = v_START_DELIMITER) and (p_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_EMIT_MESSAGE) and (p_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_EMIT_CRC) and (p_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_END_DELIMITER) and (p_MESSAGE_LENGTH_COUNTER = to_unsigned(1, 4)))
+s_RESET_MLC <= '1' when	(((r_STATE = v_START_BIT) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(2, 4))) or
+								((r_STATE = v_START_DELIMITER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
+								((r_STATE = v_EMIT_MESSAGE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
+								((r_STATE = v_EMIT_CRC) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
+								((r_STATE = v_END_DELIMITER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(1, 4))))
 								else '0';
 
 p_MESSAGE_LENGTH_COUNTER : process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
-			p_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
 			
 		elsif(s_RESET_MLC = '1') then
-			p_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
 			
 		elsif((s_AT_HALF_BT = '1') or (s_AT_FULL_BT = '1')) then
-			p_MESSAGE_LENGTH_COUNTER <= p_MESSAGE_LENGTH_COUNTER + 1;
+			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
 		
 		end if;
 	end if;
@@ -142,7 +160,7 @@ p_DATA_LENGTH_COUNTER : process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(rst = '1' or start_transmission = '1') then
-			r_DATA_LENGTH_COUNTER <= 2 * data_length;
+			r_DATA_LENGTH_COUNTER <= 2 * unsigned(data_length);
 		
 		elsif(r_STATE = v_EMIT_MESSAGE and s_RESET_MLC = '1') then
 			r_DATA_LENGTH_COUNTER <= r_DATA_LENGTH_COUNTER - 1;
@@ -169,14 +187,22 @@ begin
 		
 		-- encode bit that is going to be transmitted
 		elsif(s_AT_FULL_BT = '1') then
-			case (r_OUT_SHIFT(17) & s_ENCODE_MANCHESTER) is
+			case s_ENCODE_MANCHESTER is
 				-- encode
-				when "11" => r_ENCODED_OUT_SHIFT <= "01";
-				when "01" => r_ENCODED_OUT_SHIFT <= "10";
+				when '1' =>
+					if(r_OUT_SHIFT(17) = '1') then
+						r_ENCODED_OUT_SHIFT <= "01";
+					else
+						r_ENCODED_OUT_SHIFT <= "10";
+					end if;
 				-- don't encode
-				when "10" => r_ENCODED_OUT_SHIFT <= "11";
-				when "00" => r_ENCODED_OUT_SHIFT <= "00";
-				
+				when '0' =>
+					if(r_OUT_SHIFT(17) = '1') then
+						r_ENCODED_OUT_SHIFT <= "11";
+					else
+						r_ENCODED_OUT_SHIFT <= "00";
+					end if;
+					
 				when others =>
 			end case;
 		
@@ -189,7 +215,7 @@ end process p_ENCODED_OUT_SHIFT;
 
 -- MSB of r_ENCODED_OUT_SHIFT is the serial manchester output directly onto the bus
 --		with the exception of the start delimiter.
-p_EMISSION	:	process(r_STATE)
+p_EMISSION	:	process(r_STATE, r_OUT_SHIFT)
 begin
 	case r_STATE is
 		when v_START_DELIMITER => encoded_out <= r_OUT_SHIFT(17);
@@ -211,7 +237,7 @@ p_DATA_SCHEDULING	:	process(clk)
 begin
 	if(rising_edge(clk)) then
 		-- at the start of the transmission, load the start bit and the start delimiter
-		if((r_STATE = v_IDLE) & (start_transmission = '1')) then
+		if((r_STATE = v_IDLE) and (start_transmission = '1')) then
 			r_OUT_SHIFT <= '1' & v_SLAVE_DELIMITER & '0';
 		
 		-- when emitting the last bit of the previous message, load the next message
@@ -219,7 +245,7 @@ begin
 			r_OUT_SHIFT <= dout & "0000000000";
 			
 		-- when emitting the last bit of the last message word, emit CRC + end delimiter [PLACEHOLDER]
-		elsif((r_STATE = v_EMIT_MESSAGE) & (s_RESET_MLC = '1') & (r_DATA_LENGTH_COUNTER = to_unsigned(0, 4))) then
+		elsif((r_STATE = v_EMIT_MESSAGE) and (s_RESET_MLC = '1') and (r_DATA_LENGTH_COUNTER = to_unsigned(0, 4))) then
 			r_OUT_SHIFT <= "000000001100000000";
 			
 		-- shift the register at every emitted bit
@@ -239,23 +265,23 @@ begin
 		if(rst = '1') then
 			r_STATE <= v_IDLE;
 			
-		elsif((r_STATE = v_IDLE) & (start_transmission = '1')) then
+		elsif((r_STATE = v_IDLE) and (start_transmission = '1')) then
 			r_STATE <= v_START_BIT;
 		
 		-- in the current version, behaving as a slave is assumed
-		elsif((r_STATE = v_START_BIT) & (s_RESET_MLC = '1')) then
+		elsif((r_STATE = v_START_BIT) and (s_RESET_MLC = '1')) then
 			r_STATE <= v_START_DELIMITER;
 			
-		elsif((r_STATE = v_START_DELIMITER) & (s_RESET_MLC = '1')) then
+		elsif((r_STATE = v_START_DELIMITER) and (s_RESET_MLC = '1')) then
 			r_STATE <= v_EMIT_MESSAGE;
 			
-		elsif((r_STATE = v_EMIT_MESSAGE) & (s_RESET_MLC = '1') & (r_DATA_LENGTH_COUNTER = to_unsigned(0, 4))) then
+		elsif((r_STATE = v_EMIT_MESSAGE) and (s_RESET_MLC = '1') and (r_DATA_LENGTH_COUNTER = to_unsigned(0, 4))) then
 			r_STATE <= v_EMIT_CRC;
 			
-		elsif((r_STATE = v_EMIT_CRC) & (s_RESET_MLC = '1')) then
+		elsif((r_STATE = v_EMIT_CRC) and (s_RESET_MLC = '1')) then
 			r_STATE <= v_END_DELIMITER;
 
-		elsif((r_STATE = v_END_DELIMITER) & (s_RESET_MLC = '1')) then
+		elsif((r_STATE = v_END_DELIMITER) and (s_RESET_MLC = '1')) then
 			r_STATE <= v_IDLE;
 
 		end if;

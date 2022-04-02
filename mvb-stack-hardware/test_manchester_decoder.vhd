@@ -8,7 +8,7 @@ USE ieee.numeric_std.ALL;
 ENTITY testbench IS
 END testbench;
 
-ARCHITECTURE behavior OF testbench IS
+ARCHITECTURE behavior OF test_manchester_decoder IS
 
 	component e_MANCHESTER_DECODER is
 		Port(clk_xx : in  		std_logic;
