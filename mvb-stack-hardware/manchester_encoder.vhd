@@ -179,7 +179,7 @@ end process p_DATA_LENGTH_COUNTER;
 --		bit, then is shifted towards MSB at BT/2. The MSB of this register is the serial manchester output
 --		of the module.
 
-s_ENCODE_MANCHESTER <= '1' when ((r_STATE = v_EMIT_MESSAGE) or (r_STATE = v_EMIT_CRC)) else '0';
+s_ENCODE_MANCHESTER <= '0' when (r_STATE = v_END_DELIMITER) else '1';
 
 p_ENCODED_OUT_SHIFT :	process(clk)
 begin
@@ -189,38 +189,27 @@ begin
 		
 		-- encode bit that is going to be transmitted
 		elsif(s_AT_FULL_BT = '1') then
-			case s_ENCODE_MANCHESTER is
-				-- encode
-				when '1' =>
-					if(r_OUT_SHIFT(17) = '1') then
-						r_ENCODED_OUT_SHIFT <= "01";
-					else
-						r_ENCODED_OUT_SHIFT <= "10";
-					end if;
-				-- don't encode
-				when '0' =>
-					if(r_OUT_SHIFT(17) = '1') then
-						r_ENCODED_OUT_SHIFT <= "11";
-					else
-						r_ENCODED_OUT_SHIFT <= "00";
-					end if;
-					
-				when others =>
-			end case;
-		
+			if(r_OUT_SHIFT(17) = '1') then
+				r_ENCODED_OUT_SHIFT <= "01";
+			else
+				r_ENCODED_OUT_SHIFT <= "10";
+			end if;
+			
 		-- shift to send second value of manchester encoded message bit
 		elsif(s_AT_HALF_BT = '1') then
-			r_ENCODED_OUT_SHIFT <= (r_ENCODED_OUT_SHIFT(0) & r_ENCODED_OUT_SHIFT(1));
+			r_ENCODED_OUT_SHIFT <= (r_ENCODED_OUT_SHIFT(0) & '0');
 		end if;
 	end if;
 end process p_ENCODED_OUT_SHIFT;
 
 -- MSB of r_ENCODED_OUT_SHIFT is the serial manchester output directly onto the bus
 --		with the exception of the start delimiter.
-p_EMISSION	:	process(r_STATE, r_OUT_SHIFT)
+p_EMISSION	:	process(r_STATE, r_OUT_SHIFT, r_ENCODED_OUT_SHIFT)
 begin
 	case r_STATE is
 		when v_START_SEQUENCE => encoded_out <= r_OUT_SHIFT(17);
+		when v_END_DELIMITER => encoded_out <= r_OUT_SHIFT(17);
+		when v_IDLE =>	encoded_out <= '0';
 		when others => encoded_out <= r_ENCODED_OUT_SHIFT(1);
 	end case;
 end process p_EMISSION;
@@ -230,10 +219,14 @@ end process p_EMISSION;
 -- All signals necessary to schedule this are given elsewhere.
 -- This part of the hardware only generates signals that control the FIFO.
 
-rd_en <= '1' when (((r_STATE = v_EMIT_MESSAGE) and (s_RESET_MLC = '1') and 
-							(r_DATA_LENGTH_COUNTER > to_unsigned(0, 4))) or
-							((r_STATE = v_START_SEQUENCE) and
-							(s_RESET_MLC = '1'))) else '0';
+-- New data has to be read when
+rd_en <= '1' when 
+	-- there are still message bits left in the FIFO
+	(((r_STATE = v_EMIT_MESSAGE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(7, 5)) 
+			and (r_DATA_LENGTH_COUNTER > to_unsigned(0, 4)) and (s_AT_HALF_BT = '1')) or
+	-- the start sequence is at its last bit
+	((r_STATE = v_START_SEQUENCE) and(r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 5)) 
+			and (s_AT_HALF_BT = '1'))) else '0';	
 
 p_DATA_SCHEDULING	:	process(clk)
 begin

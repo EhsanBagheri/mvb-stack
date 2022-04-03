@@ -26,10 +26,6 @@
       <obj_property name="ElementShortName">start_transmission</obj_property>
       <obj_property name="ObjectShortName">start_transmission</obj_property>
    </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/wr_en" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">wr_en</obj_property>
-      <obj_property name="ObjectShortName">wr_en</obj_property>
-   </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/s_at_half_bt" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_at_half_bt</obj_property>
       <obj_property name="ObjectShortName">s_at_half_bt</obj_property>
@@ -46,6 +42,10 @@
       <obj_property name="ElementShortName">r_state[2:0]</obj_property>
       <obj_property name="ObjectShortName">r_state[2:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_encoder/uut/rd_en" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rd_en</obj_property>
+      <obj_property name="ObjectShortName">rd_en</obj_property>
    </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/dout" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">dout[7:0]</obj_property>
