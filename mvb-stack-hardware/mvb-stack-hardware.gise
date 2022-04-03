@@ -65,12 +65,13 @@
     <transform xil_pn:end_ts="1648984741" xil_pn:in_ck="3131006471017111943" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1648984741">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <outfile xil_pn:name="even_parity_bit_emitter.vhd"/>
-      <outfile xil_pn:name="manchester_decoder.vhd"/>
-      <outfile xil_pn:name="manchester_encoder.vhd"/>
-      <outfile xil_pn:name="test_even_parity_bit_emitter.vhd"/>
-      <outfile xil_pn:name="test_manchester_decoder.vhd"/>
-      <outfile xil_pn:name="test_manchester_encoder.vhd"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="InputRemoved"/>
+      <status xil_pn:value="OutputChanged"/>
+      <status xil_pn:value="OutputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648907621" xil_pn:name="TRAN_xawsToSimhdl" xil_pn:prop_ck="9184696845300216926" xil_pn:start_ts="1648907621">
       <status xil_pn:value="SuccessfullyRun"/>
@@ -89,29 +90,36 @@
     <transform xil_pn:end_ts="1648984741" xil_pn:in_ck="3131006471017111943" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1648984741">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <outfile xil_pn:name="even_parity_bit_emitter.vhd"/>
-      <outfile xil_pn:name="manchester_decoder.vhd"/>
-      <outfile xil_pn:name="manchester_encoder.vhd"/>
-      <outfile xil_pn:name="test_even_parity_bit_emitter.vhd"/>
-      <outfile xil_pn:name="test_manchester_decoder.vhd"/>
-      <outfile xil_pn:name="test_manchester_encoder.vhd"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="InputRemoved"/>
+      <status xil_pn:value="OutputChanged"/>
+      <status xil_pn:value="OutputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648910574" xil_pn:in_ck="-1360332459149016518" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="-8440131264768516196" xil_pn:start_ts="1648910570">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <outfile xil_pn:name="fuse.log"/>
-      <outfile xil_pn:name="isim"/>
-      <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="test_manchester_encoder_beh.prj"/>
-      <outfile xil_pn:name="test_manchester_encoder_isim_beh.exe"/>
-      <outfile xil_pn:name="xilinxsim.ini"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="InputRemoved"/>
+      <status xil_pn:value="OutputChanged"/>
+      <status xil_pn:value="OutputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648910574" xil_pn:in_ck="-8565106813062566394" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="-492253534921656247" xil_pn:start_ts="1648910574">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <outfile xil_pn:name="isim.cmd"/>
-      <outfile xil_pn:name="isim.log"/>
-      <outfile xil_pn:name="test_manchester_encoder_isim_beh.wdb"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputRemoved"/>
+      <status xil_pn:value="OutputChanged"/>
+      <status xil_pn:value="OutputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648904277" xil_pn:name="TRAN_copyInitialToXSTAbstractSynthesis" xil_pn:start_ts="1648904277">
       <status xil_pn:value="SuccessfullyRun"/>
@@ -149,7 +157,9 @@
       <status xil_pn:value="ReadyToRun"/>
       <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputAdded"/>
       <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="InputRemoved"/>
       <status xil_pn:value="OutputRemoved"/>
     </transform>
     <transform xil_pn:end_ts="1648904285" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="6883790743207268581" xil_pn:start_ts="1648904285">
