@@ -77,7 +77,7 @@ BEGIN
 		-- load fifo
       wait for clk_period*10;
       wr_en <= '1';
-		din <= "01010101";
+		din <= "10101010";
 		wait for clk_period;	
 		din <= "11001100";		
 		wait for clk_period;		

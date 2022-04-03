@@ -30,10 +30,6 @@
       <obj_property name="ElementShortName">wr_en</obj_property>
       <obj_property name="ObjectShortName">wr_en</obj_property>
    </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/encoded_out" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">encoded_out</obj_property>
-      <obj_property name="ObjectShortName">encoded_out</obj_property>
-   </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/s_at_half_bt" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_at_half_bt</obj_property>
       <obj_property name="ObjectShortName">s_at_half_bt</obj_property>
@@ -63,13 +59,18 @@
       <obj_property name="ElementShortName">r_encoded_out_shift[1:0]</obj_property>
       <obj_property name="ObjectShortName">r_encoded_out_shift[1:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/test_manchester_encoder/encoded_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">encoded_out</obj_property>
+      <obj_property name="ObjectShortName">encoded_out</obj_property>
+   </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/s_reset_mlc" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">s_reset_mlc</obj_property>
       <obj_property name="ObjectShortName">s_reset_mlc</obj_property>
    </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/r_message_length_counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_message_length_counter[3:0]</obj_property>
-      <obj_property name="ObjectShortName">r_message_length_counter[3:0]</obj_property>
+      <obj_property name="ElementShortName">r_message_length_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_message_length_counter[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/test_manchester_encoder/uut/r_data_length_counter" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">r_data_length_counter[7:0]</obj_property>

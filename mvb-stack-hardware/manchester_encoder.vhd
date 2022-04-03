@@ -30,11 +30,10 @@ constant v_BIT_TIME : integer := 40;										-- how many clk periods doeas a bi
 
 -- state machine constants:
 constant v_IDLE : std_logic_vector(2 downto 0) := "000";
-constant v_START_BIT : std_logic_vector(2 downto 0) := "001";
-constant v_START_DELIMITER : std_logic_vector(2 downto 0) := "010";
-constant v_EMIT_MESSAGE : std_logic_vector(2 downto 0) := "011";
-constant v_EMIT_CRC : std_logic_vector(2 downto 0) := "100";
-constant v_END_DELIMITER : std_logic_vector(2 downto 0) := "101";
+constant v_START_SEQUENCE : std_logic_vector(2 downto 0) := "001";
+constant v_EMIT_MESSAGE : std_logic_vector(2 downto 0) := "010";
+constant v_EMIT_CRC : std_logic_vector(2 downto 0) := "011";
+constant v_END_DELIMITER : std_logic_vector(2 downto 0) := "100";
 
 -- constants for delimiter detection (start bit not included)
 constant v_MASTER_DELIMITER : std_logic_vector(15 downto 0) := "1100011100010101";
@@ -79,9 +78,10 @@ signal s_AT_FULL_BT	:	std_logic;
 -- signals used for message emission
 signal r_OUT_SHIFT	:	std_logic_vector(17 downto 0);			-- shift register containing the current message vector (MSB <-- LSB)
 signal r_ENCODED_OUT_SHIFT	:	std_logic_vector(1 downto 0);		-- mini shift register, containing a single manchester coded bit
-signal r_MESSAGE_LENGTH_COUNTER	:	unsigned(3 downto 0);		-- how many times has r_OUT_SHIFT been shifted since the last bit of data has been loaded
+signal r_MESSAGE_LENGTH_COUNTER	:	unsigned(4 downto 0);		-- how many times has r_OUT_SHIFT been shifted since the last bit of data has been loaded
 signal r_DATA_LENGTH_COUNTER	:	unsigned(7 downto 0);			-- how many times 16 bits does the messaged data word contain?
 signal s_RESET_MLC	:	std_logic;										-- 1 when the transmission is about to reach a new chunk of message (always new state except when emitting data message)
+signal s_MLC_NEARING_RESET	:	std_logic;								-- 1 when the transmission is about to reach a new chunk of message, but isn't at a bit end yet
 signal s_ENCODE_MANCHESTER	:	std_logic;								-- does the data word in r_OUT_SHIFT need to be manchester encoded?
 
 
@@ -119,7 +119,7 @@ begin
 		if(rst = '1') then
 			r_BT_COUNTER <= to_unsigned(0, 8);
 			
-		elsif(s_AT_FULL_BT = '1') then
+		elsif(s_AT_FULL_BT = '1' or start_transmission = '1') then
 			r_BT_COUNTER <= to_unsigned(0, 8);
 			
 		else
@@ -131,23 +131,25 @@ begin
 end process p_BIT_TIME_COUNTER;
 
 --_____________________________TRANSMISSION SCHEDULING_____________________________--
-s_RESET_MLC <= '1' when	(((r_STATE = v_START_BIT) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(2, 4))) or
-								((r_STATE = v_START_DELIMITER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_EMIT_MESSAGE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_EMIT_CRC) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(15, 4))) or
-								((r_STATE = v_END_DELIMITER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(1, 4))))
-								else '0';
+s_MLC_NEARING_RESET <= '1' when
+									((r_STATE = v_START_SEQUENCE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 5))) or
+									((r_STATE = v_EMIT_MESSAGE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(7, 5))) or
+									((r_STATE = v_EMIT_CRC) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(7, 5))) or
+									((r_STATE = v_END_DELIMITER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(1, 5)))
+									else '0';
+									
+s_RESET_MLC <= '1' when ((start_transmission = '1') or (s_AT_FULL_BT = '1' and s_MLC_NEARING_RESET = '1')) else '0';
 
 p_MESSAGE_LENGTH_COUNTER : process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 5);
 			
-		elsif(s_RESET_MLC = '1') then
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 4);
+		elsif(s_RESET_MLC = '1' and s_AT_FULL_BT = '1') then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 5);
 			
-		elsif((s_AT_HALF_BT = '1') or (s_AT_FULL_BT = '1')) then
+		elsif(s_AT_FULL_BT = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
 		
 		end if;
@@ -177,7 +179,7 @@ end process p_DATA_LENGTH_COUNTER;
 --		bit, then is shifted towards MSB at BT/2. The MSB of this register is the serial manchester output
 --		of the module.
 
-s_ENCODE_MANCHESTER <= '1' when ((r_STATE = v_START_BIT) and (r_STATE = v_EMIT_MESSAGE) and (r_STATE = v_EMIT_CRC)) else '0';
+s_ENCODE_MANCHESTER <= '1' when ((r_STATE = v_EMIT_MESSAGE) or (r_STATE = v_EMIT_CRC)) else '0';
 
 p_ENCODED_OUT_SHIFT :	process(clk)
 begin
@@ -218,7 +220,7 @@ end process p_ENCODED_OUT_SHIFT;
 p_EMISSION	:	process(r_STATE, r_OUT_SHIFT)
 begin
 	case r_STATE is
-		when v_START_DELIMITER => encoded_out <= r_OUT_SHIFT(17);
+		when v_START_SEQUENCE => encoded_out <= r_OUT_SHIFT(17);
 		when others => encoded_out <= r_ENCODED_OUT_SHIFT(1);
 	end case;
 end process p_EMISSION;
@@ -230,15 +232,15 @@ end process p_EMISSION;
 
 rd_en <= '1' when (((r_STATE = v_EMIT_MESSAGE) and (s_RESET_MLC = '1') and 
 							(r_DATA_LENGTH_COUNTER > to_unsigned(0, 4))) or
-							((r_STATE = v_START_DELIMITER) and
+							((r_STATE = v_START_SEQUENCE) and
 							(s_RESET_MLC = '1'))) else '0';
 
 p_DATA_SCHEDULING	:	process(clk)
 begin
 	if(rising_edge(clk)) then
-		-- at the start of the transmission, load the start bit and the start delimiter
+		-- at the start of the transmission, load the start bit and the start delimiter both
 		if((r_STATE = v_IDLE) and (start_transmission = '1')) then
-			r_OUT_SHIFT <= '1' & v_SLAVE_DELIMITER & '0';
+			r_OUT_SHIFT <= "10" & v_SLAVE_DELIMITER;
 		
 		-- when emitting the last bit of the previous message, load the next message
 		elsif(rd_en = '1') then
@@ -249,9 +251,9 @@ begin
 			r_OUT_SHIFT <= "000000001100000000";
 			
 		-- shift the register at every emitted bit
-		elsif((r_STATE /= v_START_DELIMITER) and (s_AT_FULL_BT = '1')) then
+		elsif((r_STATE /= v_START_SEQUENCE) and (s_AT_FULL_BT = '1')) then
 			r_OUT_SHIFT <= r_OUT_SHIFT(16 downto 0) & '0';
-		elsif((r_STATE = v_START_DELIMITER) and (s_AT_HALF_BT = '1')) then
+		elsif((r_STATE = v_START_SEQUENCE) and ((s_AT_HALF_BT = '1') or (s_AT_FULL_BT = '1'))) then
 			r_OUT_SHIFT <= r_OUT_SHIFT(16 downto 0) & '0';
 		end if;
 	end if;
@@ -264,15 +266,12 @@ begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_STATE <= v_IDLE;
-			
-		elsif((r_STATE = v_IDLE) and (start_transmission = '1')) then
-			r_STATE <= v_START_BIT;
 		
 		-- in the current version, behaving as a slave is assumed
-		elsif((r_STATE = v_START_BIT) and (s_RESET_MLC = '1')) then
-			r_STATE <= v_START_DELIMITER;
+		elsif((r_STATE = v_IDLE) and (start_transmission = '1')) then
+			r_STATE <= v_START_SEQUENCE;
 			
-		elsif((r_STATE = v_START_DELIMITER) and (s_RESET_MLC = '1')) then
+		elsif((r_STATE = v_START_SEQUENCE) and (s_RESET_MLC = '1')) then
 			r_STATE <= v_EMIT_MESSAGE;
 			
 		elsif((r_STATE = v_EMIT_MESSAGE) and (s_RESET_MLC = '1') and (r_DATA_LENGTH_COUNTER = to_unsigned(0, 4))) then
