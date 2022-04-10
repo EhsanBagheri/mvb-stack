@@ -26,8 +26,9 @@ architecture Behavioral of e_CRC_CALCULATOR is
 
 -- state machine constants
 constant v_IDLE : std_logic_vector(1 downto 0) := "00";
-constant v_SHIFT_INPUT : std_logic_vector(1 downto 0) := "01";
-constant v_SHIFT_ZEROES : std_logic_vector(1 downto 0) := "10";
+constant v_SET_START_SHIFTREG : std_logic_vector(1 downto 0) := "01";
+constant v_SHIFT_INPUT : std_logic_vector(1 downto 0) := "10";
+constant v_SHIFT_ZEROES : std_logic_vector(1 downto 0) := "11";
 
 -- state machine signals
 signal r_STATE	: std_logic_vector(1 downto 0);
@@ -52,7 +53,7 @@ begin
 			r_MESSAGE_LENGTH_COUNTER <= unsigned(awaited_ipnut_length);
 		
 		-- count how many input bits are left
-		elsif(r_STATE = v_SHIFT_INPUT and read_input = '1') then
+		elsif((r_STATE = v_SHIFT_INPUT or r_STATE = v_SET_START_SHIFTREG) and read_input = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER - 1;
 		
 		-- count how many zeroes have been shifted
@@ -75,7 +76,7 @@ begin
 		elsif(r_STATE = v_IDLE and start_calculation = '1') then
 			r_CRC_SHIFT_REGISTER <= "00000000";
 		
-		elsif(r_STATE = v_SHIFT_INPUT and read_input = '1') then
+		elsif((r_STATE = v_SHIFT_INPUT or r_STATE = v_SET_START_SHIFTREG) and read_input = '1') then
 			r_CRC_SHIFT_REGISTER <= s_CRC_SHIFT_REGISTER_NEXT;
 			
 		elsif(r_STATE = v_SHIFT_ZEROES) then
@@ -88,6 +89,9 @@ end process p_GENERATE_CRC;
 p_CRC_SHIFT_NEXT_GENERATION : process(serial_input, r_CRC_SHIFT_REGISTER)
 begin
 	case r_STATE is
+		when v_SET_START_SHIFTREG =>
+			s_CRC_SHIFT_REGISTER_NEXT <= (r_CRC_SHIFT_REGISTER(6 downto 0) & serial_input);
+			
 		when v_SHIFT_INPUT =>
 			s_CRC_SHIFT_REGISTER_NEXT <= ((r_CRC_SHIFT_REGISTER(6) xor r_CRC_SHIFT_REGISTER(7)) &	-- x7
 													(r_CRC_SHIFT_REGISTER(5) xor r_CRC_SHIFT_REGISTER(7))	&	-- x6
@@ -121,6 +125,9 @@ begin
 			r_STATE <= v_IDLE;
 			
 		elsif(r_STATE = v_IDLE and start_calculation = '1') then
+			r_STATE <= v_SET_START_SHIFTREG;
+			
+		elsif(r_STATE = v_SET_START_SHIFTREG and r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 8)) then
 			r_STATE <= v_SHIFT_INPUT;
 			
 		elsif(r_STATE = v_SHIFT_INPUT and r_MESSAGE_LENGTH_COUNTER = to_unsigned(0, 8)) then

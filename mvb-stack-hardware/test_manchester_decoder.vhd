@@ -5,13 +5,13 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-ENTITY testbench IS
-END testbench;
+ENTITY test_manchester_decoder IS
+END test_manchester_decoder;
 
 ARCHITECTURE behavior OF test_manchester_decoder IS
 
 	component e_MANCHESTER_DECODER is
-		Port(clk_xx : in  		std_logic;
+		Port(clk : in  		std_logic;
 			  rst : in 				std_logic;
 			  rdn : in 				std_logic;
 			  manchester_in : in	std_logic;
@@ -28,7 +28,7 @@ ARCHITECTURE behavior OF test_manchester_decoder IS
 	constant test_manchester_code : std_logic_vector(93 downto 0) := "0000000011001010101010101010010110100101101001011010010110101010100011100011010000000000000000";	
 	signal i : integer := 0;
 	
-	signal clk_xx : std_logic := '0';
+	signal clk : std_logic := '0';
 	signal rst : std_logic := '0';
 	signal rdn : std_logic := '0';
 	signal manchester_in : std_logic := '0';
@@ -42,7 +42,7 @@ BEGIN
 
 -- Component Instantiation
 		 tested_decoder: e_MANCHESTER_DECODER PORT MAP(
-					clk_xx => clk_xx,
+					clk => clk,
 					rst => rst,
 					rdn => rdn,
 					manchester_in => manchester_in,
@@ -53,16 +53,16 @@ BEGIN
 	-- Generate clock signal
 	clk_gen : process
 	begin
-		clk_xx <= '0';
+		clk <= '0';
 		wait for clk_period/2;
-		clk_xx <= '1';
+		clk <= '1';
 		wait for clk_period/2;
 	end process clk_gen;
 	
 	-- count a sending period, because it didin't work with a wait statement
-	sending_sync : process (clk_xx)
+	sending_sync : process (clk)
 	begin
-		if(rising_edge(clk_xx)) then
+		if(rising_edge(clk)) then
 			if((input_sync_counter = to_unsigned(50, 8)) or (rst = '1')) then input_sync_counter <= to_unsigned(0, 8);
 			else input_sync_counter <= input_sync_counter + 1;
 			end if;
@@ -70,10 +70,10 @@ BEGIN
 	end process sending_sync;
 	
 	-- Generate manchester coded serial input
-	manchester_gen : process (clk_xx)
+	manchester_gen : process (clk)
 	begin
 		if(rst = '0') then
-				if(rising_edge(clk_xx) and (input_sync_counter = to_unsigned(0, 8))) then
+				if(rising_edge(clk) and (input_sync_counter = to_unsigned(0, 8))) then
 					manchester_in <= test_manchester_code(i);
 					i <= i + 1;
 				end if;
