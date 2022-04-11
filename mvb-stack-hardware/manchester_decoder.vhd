@@ -46,7 +46,7 @@ signal r_CURRENT_BIT_DECODED : std_logic;													-- non-manchester value of
 signal r_MESSAGE_LENGTH_COUNTER : unsigned(4 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
 signal s_MESSAGE_WORD_READY : std_logic := '0';											-- 16 bit word has been received on the manchester coded input
 signal r_SLAVE_DATA_RECEIVED : std_logic_vector(15 downto 0);						-- register that stores the complete DATA part of a frame (currently 16 bits only)
-signal r_WORD_COUNTER : unsigned(5 downto 0);											-- how many 16 bit words need to be read until the transmission is over?
+signal r_WORD_COUNTER : unsigned(4 downto 0);											-- how many 16 bit words need to be read until the transmission is over?
 
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
@@ -228,8 +228,8 @@ begin
 				when "01"	=>		
 					r_WORD_COUNTER <= to_unsigned(1, 5);
 				when "10"	=>		
-					r_WORD_COUNTER <= r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH;
-				when others =>		to_unsigned(1, 5);
+					r_WORD_COUNTER <= unsigned(r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH);
+				when others =>		r_WORD_COUNTER <= to_unsigned(1, 5);
 			end case;
 		-- subtract from the total words remaining after every 16 bit transfer
 		elsif(true) then
@@ -333,11 +333,11 @@ begin
 				when others =>		r_STATE <= v_IDLE;
 			end case;
 			
-		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+		elsif((r_STATE = v_RECEIVE_MASTER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
 			r_LAST_RECEIVED_MASTER_DATA <= r_MAN_DATA_IN_SHIFT;		-- save master data
 			r_STATE <= v_RECEIVE_CRC;
 			
-		elsif((r_STATE = v_RECEIVE_MASTER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
 			r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received
 			r_STATE <= v_RECEIVE_CRC;
 			
@@ -362,7 +362,7 @@ end process p_TRANSMISSION_STATE_MACHINE;
 --	How many 16 bit MVB words long is the next slave data on the MVB bus going to contain?
 p_DETERMINE_NEXT_MESSAGE_LENGTH : process(clk, r_LAST_RECEIVED_MASTER_DATA(15 downto 11))
 begin
-	case r_LAST_RECEIVED_MASTER_DATA(15 downto 11) is
+	case r_LAST_RECEIVED_MASTER_DATA(15 downto 12) is
 		-- Process Data /w 16bit length, Mastership_Transfer, General_Event, Group_Event, Single_Event, Device_Status
 		when "0000" | "1000" | "1001" | "1101" | "1110" | "1111" =>
 			r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(1, 5);
@@ -382,6 +382,10 @@ begin
 		-- Process Data /w 256bit length, Message Data
 		when "0100" | "1100" =>
 			r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(16, 5);
+			
+		-- Handle exceptions so the code compiles. This is reserved for custom stuff usually.
+		when others =>
+			r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH <= to_unsigned(1, 5);
 	end case;
 end process p_DETERMINE_NEXT_MESSAGE_LENGTH;
 
