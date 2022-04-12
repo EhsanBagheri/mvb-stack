@@ -21,6 +21,7 @@ architecture Behavioral of e_MANCHESTER_DECODER is
 constant v_MVB_WORD_WIDTH_WIDTH : integer := 4;
 constant v_MVB_WORD_WIDTH : integer := 2**v_MVB_WORD_WIDTH_WIDTH;	-- MVB data word width is per industry standard 16 bits, which fits on 4 bits
 constant v_SAMPLING_COUNTER_WIDTH : integer := 16;						-- width of the counter, based on which the sample enable signal is generated log2(oversampling)
+constant v_125us : integer := 10;											-- how many clock cycles does 125 us take?
 
 -- state machine constants:
 constant v_IDLE : std_logic_vector(2 downto 0) := "000";
@@ -51,7 +52,6 @@ signal r_WORD_COUNTER : unsigned(4 downto 0);											-- how many 16 bit words
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
 signal r_SAMPLING_COUNTER_AT_HALF_BIT : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(2**v_SAMPLING_COUNTER_WIDTH - 1, v_SAMPLING_COUNTER_WIDTH);		-- register to save counter value at edge for BT measurement
-signal r_NEXT_BIT_TIME : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0);			-- length of the next bit time
 signal s_IN_BIT_MIDDLE : std_logic := '0';												-- indicator signal that the transmission is between 25% BT and 75% BT, so an edge should be expected
 signal s_AT_EDGE : std_logic := '0';														-- indicator signal that an edge has been detected on r_INPUT_BIT_TIME_SHIFT
 
@@ -72,13 +72,15 @@ signal r_CRC_IN : std_logic_vector(7 downto 0) := "00000000";						-- input shif
 signal s_CRC_READY : std_logic := '0';														-- '1' when the CRC is completely received
 
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
-signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when an end delimiter is closed with a falling edge
+signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when the bus has been in a low state for longer than 0.5BT + 0.125 us
+signal r_END_DELIMITER_COUNTER : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0);
 
 -- state machine signals:
 signal r_STATE : std_logic_vector(2 downto 0) := "000";
 signal s_AT_RISING_EDGE : std_logic := '0';												-- 1 if a rising edge is detected (as close to the rising edge as possible)
 signal s_AT_FALLING_EDGE : std_logic := '0';												-- 1 if a falling edge is detected (-||-)
 signal r_START_BIT_BIT_TIME : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);		-- counter to measure the half bit time of the start bit
+signal r_START_BIT_BIT_TIME_SAVED : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0) := to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 signal s_DECODE_MANCHESTER : std_logic := '0';											-- only decode manchester signal if either data or CRC is being received
 
 -- registers that carry information across transmissions
@@ -179,28 +181,6 @@ begin
 	end if;	
 end process p_DECODED_SHIFT;
 
--- counter that counts the number of decoded bits in the current word
---		it actually counts how many shifts have happened, therefore it needs to be reset at 16 and not 15
---		in the case of the message as well as 8 and not seven in the case of the CRC
-p_MESSAGE_LENGTH_COUNTER : process(clk)
-begin
-	if(rising_edge(clk)) then
-		if(rst = '1') then
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
-			
-		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
-			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
-			
-		elsif((r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
-			
-		elsif(r_STATE = v_START_BIT) then
-			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
-			
-		end if;
-	end if;
-end process p_MESSAGE_LENGTH_COUNTER;
-
 -- get edge direction of current bit, save value according to the manchester coding standard
 -- save the value of the sampling counter for synchronization purposes
 p_DECODE_BIT_VALUE : process (r_INPUT_EDGE_SHIFT)
@@ -214,6 +194,42 @@ begin
 			r_CURRENT_BIT_DECODED <= r_CURRENT_BIT_DECODED;
 	end case;
 end process p_DECODE_BIT_VALUE;
+
+
+-- sample value at clk3 and clk11 (at 25% and 75%)
+s_SAMPLE_AT_25 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 / 4) else '0';
+s_SAMPLE_AT_75 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 * 3/4) else '0';
+s_SAMPLE_MANCHESTER_INPUT <= '1' when (s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 = '1') else '0';
+
+
+--_____________________________DATA MESSAGE SCHEDULING_____________________________--
+
+-- counter that counts the number of decoded bits in the current word
+--		it actually counts how many shifts have happened, therefore it needs to be reset at 16 and not 15
+--		in the case of the message as well as 8 and not seven in the case of the CRC
+p_MESSAGE_LENGTH_COUNTER : process(clk)
+begin
+	if(rising_edge(clk)) then
+		if(rst = '1') then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
+			
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
+			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
+			
+		-- message isn't over yet
+		elsif((r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) and (r_WORD_COUNTER > to_unsigned(0, 5))) then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(1, v_MVB_WORD_WIDTH_WIDTH+1);
+			
+		-- no more words left to read
+		elsif((r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) and (r_WORD_COUNTER = to_unsigned(0, 5))) then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(1, v_MVB_WORD_WIDTH_WIDTH+1);
+			
+		elsif(r_STATE = v_START_BIT) then
+			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
+			
+		end if;
+	end if;
+end process p_MESSAGE_LENGTH_COUNTER;
 
 
 p_COUNT_MVB_WORDS : process(clk)
@@ -231,18 +247,14 @@ begin
 					r_WORD_COUNTER <= unsigned(r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH);
 				when others =>		r_WORD_COUNTER <= to_unsigned(1, 5);
 			end case;
+			
 		-- subtract from the total words remaining after every 16 bit transfer
-		elsif(true) then
-		
+		elsif(r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) then
+			r_WORD_COUNTER <= r_WORD_COUNTER - 1;
 		end if;
 	end if;
 end process p_COUNT_MVB_WORDS;
 
-
--- sample value at clk3 and clk11 (at 25% and 75%)
-s_SAMPLE_AT_25 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 / 4) else '0';
-s_SAMPLE_AT_75 <= '1' when (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2 * 3/4) else '0';
-s_SAMPLE_MANCHESTER_INPUT <= '1' when (s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 = '1') else '0';
 
 --_____________________________RECEIVE START DELIMITER_____________________________--
 -- In the start delimiter state, the input sequence will be sampled at double bitrate, because
@@ -283,9 +295,23 @@ s_CRC_READY <= '1' when ((r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 4))
 										and (r_STATE = v_RECEIVE_CRC)) else '0';
 										
 --_____________________________END DELIMITER RECEPTION_____________________________--
--- the end delimiter is for EMD 1 BT LOW and 1 BT HIGH, emitted by whatever device
---		is currently sending data onto the bus. Therefore the end delimiter ends at the next falling edge.
-s_END_OF_END_DELIMITER <= '1' when ((r_STATE = v_END_DELIMITER) and (s_AT_FALLING_EDGE = '1')) else '0';
+-- the end delimiter is a low bus state, that is longer than 0.75BT + 0.125 us
+s_END_OF_END_DELIMITER <= '1' when (r_END_DELIMITER_COUNTER = r_START_BIT_BIT_TIME*3/4 + v_125us) else '0';
+
+p_END_DELIMITER_CHECK : process(clk)
+begin
+	if(rising_edge(clk)) then
+		if(rst = '1') then
+			r_END_DELIMITER_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+			
+		elsif(manchester_in = '0') then
+			r_END_DELIMITER_COUNTER <= r_END_DELIMITER_COUNTER + 1;
+			
+		else
+			r_END_DELIMITER_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+		end if;
+	end if;
+end process p_END_DELIMITER_CHECK;
 
 --_____________________________TRANSMISSION STATE MACHINE_____________________________--
 s_AT_RISING_EDGE <= '1' when (r_INPUT_BIT_TIME_SHIFT = "01") else '0';
@@ -299,6 +325,7 @@ begin
 			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		elsif(r_STATE = v_START_BIT) then
 			r_START_BIT_BIT_TIME <= r_START_BIT_BIT_TIME + 1;
+			r_START_BIT_BIT_TIME_SAVED <= r_START_BIT_BIT_TIME;
 		else
 			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		end if;
@@ -343,7 +370,13 @@ begin
 			
 		elsif((r_STATE = v_RECEIVE_CRC) and (s_CRC_READY = '1') and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
 			r_CRC_IN <= r_MAN_DATA_IN_SHIFT(7 downto 0); -- save CRC before more manchester stuff is received [MSB!!]
-			r_STATE <= v_END_DELIMITER;
+			
+			-- return to receiving slave data if there are more words to be read
+			if(r_WORD_COUNTER > to_unsigned(0, 5)) then
+				r_STATE <= v_RECEIVE_SLAVE;
+			else
+				r_STATE <= v_END_DELIMITER;
+			end if;
 			
 		elsif((r_STATE = v_END_DELIMITER) and (s_END_OF_END_DELIMITER = '1')) then
 			r_STATE <= v_IDLE;
