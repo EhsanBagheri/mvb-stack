@@ -47,7 +47,9 @@ signal r_CURRENT_BIT_DECODED : std_logic;													-- non-manchester value of
 signal r_MESSAGE_LENGTH_COUNTER : unsigned(4 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
 signal s_MESSAGE_WORD_READY : std_logic := '0';											-- 16 bit word has been received on the manchester coded input
 signal r_SLAVE_DATA_RECEIVED : std_logic_vector(15 downto 0);						-- register that stores the complete DATA part of a frame (currently 16 bits only)
-signal r_WORD_COUNTER : unsigned(4 downto 0);											-- how many 16 bit words need to be read until the transmission is over?
+signal r_WORD_COUNTER : unsigned(4 downto 0);										-- how many 16 bit words need to be read until the transmission is over?
+signal r_WORD_GROUP_COUNTER : unsigned(2 downto 0);                                 -- how many times 16 bits are left from the current 64 bit stack
+signal r_GROUP_COUNTER_INIT_VALUE : unsigned(2 downto 0);                           -- value to which r_WORD_GROUP_COUNTER will be set at the start of each receive data phase
 
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
@@ -69,7 +71,8 @@ signal s_START_DELIMITER_VALUE_CHECK : std_logic_vector(1 downto 0) := "00";			-
 
 -- signals for receiving the 8 bit check sequence (CRC)
 signal r_CRC_IN : std_logic_vector(7 downto 0) := "00000000";						-- input shift register for the CRC
-signal s_CRC_READY : std_logic := '0';														-- '1' when the CRC is completely received
+signal s_CRC_READY : std_logic := '0';												-- '1' when the CRC is completely received
+signal r_CRC_LENGTH_COUNTER : unsigned(3 downto 0);                                 -- counts how many bits of the CRC have been received, bc r_MESSAGE_LENGTH_COUNTER is needed elsewhere
 
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
 signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when the bus has been in a low state for longer than 0.5BT + 0.125 us
@@ -207,17 +210,16 @@ s_SAMPLE_MANCHESTER_INPUT <= '1' when (s_SAMPLE_AT_25 = '1') or (s_SAMPLE_AT_75 
 
 -- counter that counts the number of decoded bits in the current word
 --		it actually counts how many shifts have happened, therefore it needs to be reset at 16 and not 15
---		in the case of the message as well as 8 and not seven in the case of the CRC
 p_MESSAGE_LENGTH_COUNTER : process(clk)
 begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, v_MVB_WORD_WIDTH_WIDTH+1);
 			
-		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (s_DECODE_MANCHESTER = '1')) then
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (r_STATE = v_RECEIVE_MASTER or r_STATE = v_RECEIVE_SLAVE)) then
 			r_MESSAGE_LENGTH_COUNTER <= r_MESSAGE_LENGTH_COUNTER + 1;
 			
-		-- message isn't over yet
+		-- message isn't over yet --> 64 bits of data will be followed by 8 bits of CRC
 		elsif((r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) and (r_WORD_COUNTER > to_unsigned(0, 5))) then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(1, v_MVB_WORD_WIDTH_WIDTH+1);
 			
@@ -238,7 +240,9 @@ begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_WORD_COUNTER <= to_unsigned(1, 5);
-		
+			r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(1, 3);
+		    r_WORD_GROUP_COUNTER <= to_unsigned(1, 3);
+		    
 		-- when the data transmission starts, set the expected message length in the counter
 		elsif((r_STATE = v_START_DELIMITER) and (r_START_DELIMITER_COUNTER = to_unsigned(16, 5)) and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
 			case s_START_DELIMITER_VALUE_CHECK is
@@ -249,9 +253,34 @@ begin
 				when others =>		r_WORD_COUNTER <= to_unsigned(1, 5);
 			end case;
 			
+			-- how many words per word group?
+			case r_NEXT_EXPECTED_SLAVE_MESSAGE_LENGTH is 
+			    when to_unsigned(1, 5) =>  
+			         r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(1, 3);
+			         r_WORD_GROUP_COUNTER <= to_unsigned(1, 3);
+			    when to_unsigned(2, 5) =>  
+			         r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(2, 3);
+			         r_WORD_GROUP_COUNTER <= to_unsigned(2, 3);
+			    when to_unsigned(4, 5) =>   
+			         r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(4, 3);
+			         r_WORD_GROUP_COUNTER <= to_unsigned(4, 3);
+			    when to_unsigned(8, 5) =>  
+			         r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(4, 3);
+			         r_WORD_GROUP_COUNTER <= to_unsigned(4, 3);
+			    when to_unsigned(16, 5) =>  
+			         r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(4, 3);
+			         r_WORD_GROUP_COUNTER <= to_unsigned(4, 3);
+			    when others => r_GROUP_COUNTER_INIT_VALUE <= to_unsigned(1, 3);
+			end case;
+			
+		-- set word group counter when starting to receive data words
+		elsif(r_START_OF_STATE = '1' and r_STATE = v_RECEIVE_CRC) then
+		    r_WORD_GROUP_COUNTER <= r_GROUP_COUNTER_INIT_VALUE;
+		
 		-- subtract from the total words remaining after every 16 bit transfer
 		elsif(r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1)) then
 			r_WORD_COUNTER <= r_WORD_COUNTER - 1;
+			r_WORD_GROUP_COUNTER <= r_WORD_GROUP_COUNTER - 1;
 		end if;
 	end if;
 end process p_COUNT_MVB_WORDS;
@@ -292,8 +321,32 @@ end process p_START_DELIMITER_VALUE_CHECK;
 --_____________________________CRC RECEPTION_____________________________--
 -- CRC is already being received into r_MAN_DATA_IN_SHIFT, it will be saved to
 -- 	r_CRC_IN after the CRC reception state is over with
-s_CRC_READY <= '1' when ((r_MESSAGE_LENGTH_COUNTER = to_unsigned(8, 4))
+s_CRC_READY <= '1' when ((r_CRC_LENGTH_COUNTER = to_unsigned(8, 4))
 										and (r_STATE = v_RECEIVE_CRC)) else '0';
+										
+p_CRC_LENGTH_COUNTER : process(clk)
+begin
+	if(rising_edge(clk)) then
+		if(rst = '1') then
+			r_CRC_LENGTH_COUNTER <= to_unsigned(0, 4);
+			
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (r_STATE = v_RECEIVE_CRC)) then
+			r_CRC_LENGTH_COUNTER <= r_CRC_LENGTH_COUNTER + 1;
+			
+		-- message isn't over yet --> 64 bits of data will be followed by 8 bits of CRC
+		elsif((r_CRC_LENGTH_COUNTER = to_unsigned(15, 4)) and (r_WORD_COUNTER > to_unsigned(0, 5))) then
+			r_CRC_LENGTH_COUNTER <= to_unsigned(1, 4);
+			
+		-- no more words left to read
+		elsif((r_CRC_LENGTH_COUNTER = to_unsigned(15, 4)) and (r_WORD_COUNTER = to_unsigned(0, 5))) then
+			r_CRC_LENGTH_COUNTER <= to_unsigned(1, 4);
+			
+		elsif(r_STATE = v_START_BIT) then
+			r_CRC_LENGTH_COUNTER <= to_unsigned(0, 4);
+			
+		end if;
+	end if;
+end process p_CRC_LENGTH_COUNTER;
 										
 --_____________________________END DELIMITER RECEPTION_____________________________--
 -- the end delimiter is a low bus state, that is longer than 0.75BT + 0.125 us
@@ -378,7 +431,13 @@ begin
 			
 			r_START_OF_STATE <= '1';
 			
-		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+		--elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
+		--	r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received
+		--	r_STATE <= v_RECEIVE_CRC;
+			
+		--	r_START_OF_STATE <= '1';
+			
+		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_WORD_GROUP_COUNTER = to_unsigned(0, 3))) then
 			r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received
 			r_STATE <= v_RECEIVE_CRC;
 			
