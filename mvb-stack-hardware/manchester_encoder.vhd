@@ -44,7 +44,7 @@ constant v_SLAVE_DELIMITER : std_logic_vector(15 downto 0) := "1010100011100011"
 ---------------------------------------------------------------------
 
 
-COMPONENT fifo0
+COMPONENT fifo_generator_0
   PORT (
     clk : IN STD_LOGIC;
     rst : IN STD_LOGIC;
@@ -93,7 +93,7 @@ begin
 ----------------------------------------------------------------
 
 -- adding FIFO memory for 8 bit input data
-FIFO : fifo0
+FIFO : fifo_generator_0
   PORT MAP (
     clk => clk,
     rst => rst,

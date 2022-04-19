@@ -48,21 +48,21 @@ ARCHITECTURE behavior OF test_manchester_decoder IS
 BEGIN
 
 -- Get Slave and Master Delimiter test vectors from file (already manchester coded in the file)
-	get_test_master_frame : process is
-		variable line_v : line;
+	--get_test_master_frame : process is
+	--	variable line_v : line;
 		
-		file master_file : text;
-		file slave_file : text;
+	--	file master_file : text;
+	--	file slave_file : text;
 		
-		variable master_frame_var : std_logic_vector(67 downto 0);
+	--	variable master_frame_var : std_logic_vector(67 downto 0);
 		--variable slave_frame_var : std_logic_vector(309 downto 0);
 		
-	begin
-		file_open(master_file, "master_frame.txt", read_mode);
-		readline(master_file, line_v);
-		read(line_v, master_frame_var);
-		master_frame <= master_frame_var;
-		file_close(master_file);
+	--begin
+	--	file_open(master_file, "master_frame.txt", read_mode);
+	--	readline(master_file, line_v);
+	--	read(line_v, master_frame_var);
+	--	master_frame <= master_frame_var;
+	--	file_close(master_file);
 		
 		--file_open(slave_file, "slave_frame.txt", read_mode);
 		--readline(slave_file, line_v);
@@ -70,9 +70,9 @@ BEGIN
 		--slave_frame <= slave_frame_var;
 		--file_close(slave_file);
 		
-		wait;
-	end process get_test_master_frame;
-	
+	--	wait;
+	--end process get_test_master_frame;
+	master_frame <= "00000000110101101001011010010110100101101010101000111000110100000000";
 	slave_frame <= "1110101010010101011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110101010010101010101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101011000111000101010100";
 
 	

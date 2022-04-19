@@ -74,6 +74,7 @@ signal s_CRC_READY : std_logic := '0';														-- '1' when the CRC is compl
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
 signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when the bus has been in a low state for longer than 0.5BT + 0.125 us
 signal r_END_DELIMITER_COUNTER : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0);
+signal r_START_OF_STATE : std_logic := '0';                                           -- signal that is of value '1' for a clock cycle when the state machine switches
 
 -- state machine signals:
 signal r_STATE : std_logic_vector(2 downto 0) := "000";
@@ -147,7 +148,7 @@ begin
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			
 		-- reset on the measured bit-width (TODO)
-		elsif(r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) then
+		elsif(r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2+1) then
 			r_SAMPLING_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			
 		-- reset sampling counter at the end of the start bit to be in sync with the bit stream
@@ -304,6 +305,9 @@ begin
 		if(rst = '1') then
 			r_END_DELIMITER_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 			
+		elsif(r_START_OF_STATE = '1') then
+		    r_END_DELIMITER_COUNTER <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+			
 		elsif(manchester_in = '0') then
 			r_END_DELIMITER_COUNTER <= r_END_DELIMITER_COUNTER + 1;
 			
@@ -323,11 +327,13 @@ begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+		elsif(r_STATE = v_IDLE) then
+		    r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		elsif(r_STATE = v_START_BIT) then
 			r_START_BIT_BIT_TIME <= r_START_BIT_BIT_TIME + 1;
 			r_START_BIT_BIT_TIME_SAVED <= r_START_BIT_BIT_TIME;
 		else
-			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+			--r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		end if;
 	else
 	end if;
@@ -346,9 +352,13 @@ begin
 			r_STATE <= v_START_BIT;
 			data_ready <= '0';
 			
+			r_START_OF_STATE <= '1';
+			
 		-- start bit --> next rising edge is a start delimiter
 		elsif((r_STATE = v_START_BIT) and (s_AT_RISING_EDGE = '1')) then
 			r_STATE <= v_START_DELIMITER;
+			
+			r_START_OF_STATE <= '1';
 			
 		-- if delimiter is valid, set its type, if it is not, return to idle (have to wait until the current cycle is finished or the reception will begin too early)
 		elsif((r_STATE = v_START_DELIMITER) and (r_START_DELIMITER_COUNTER = to_unsigned(16, 5)) and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
@@ -360,13 +370,19 @@ begin
 				when others =>		r_STATE <= v_IDLE;
 			end case;
 			
+			r_START_OF_STATE <= '1';
+			
 		elsif((r_STATE = v_RECEIVE_MASTER) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
 			r_LAST_RECEIVED_MASTER_DATA <= r_MAN_DATA_IN_SHIFT;		-- save master data
 			r_STATE <= v_RECEIVE_CRC;
 			
+			r_START_OF_STATE <= '1';
+			
 		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
 			r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received
 			r_STATE <= v_RECEIVE_CRC;
+			
+			r_START_OF_STATE <= '1';
 			
 		elsif((r_STATE = v_RECEIVE_CRC) and (s_CRC_READY = '1') and (r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2)) then
 			r_CRC_IN <= r_MAN_DATA_IN_SHIFT(7 downto 0); -- save CRC before more manchester stuff is received [MSB!!]
@@ -378,12 +394,18 @@ begin
 				r_STATE <= v_END_DELIMITER;
 			end if;
 			
+			r_START_OF_STATE <= '1';
+			
 		elsif((r_STATE = v_END_DELIMITER) and (s_END_OF_END_DELIMITER = '1')) then
 			r_STATE <= v_IDLE;
 			data_ready <= '1';
 			decoded_out <= r_SLAVE_DATA_RECEIVED;
+			
+			r_START_OF_STATE <= '1';
+			
 		else
 			--r_STATE 	<= v_IDLE;			-- throw error maybe?
+			r_START_OF_STATE <= '0';
 		end if;
 	else
 	end if;
