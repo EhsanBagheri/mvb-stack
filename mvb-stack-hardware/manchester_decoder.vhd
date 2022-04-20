@@ -6,13 +6,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity e_MANCHESTER_DECODER is
-    Port ( clk 				: 	in  		std_logic;								-- 16x clock input for clock recovery and oversampling
-			  rst 				:	in 		std_logic;
-			  rdn 				: 	in 		std_logic;								-- control signal initiates read operation
-           manchester_in 	: 	in  		std_logic;								-- incoming serial manchester-coded data
-           decoded_out 		: 	out  		std_logic_vector(15 downto 0);	-- outgoing data word
-			  data_ready 		: 	out 		std_logic;								-- indicates that the decoded_out data is ready
-			  decode_error 	: 	out		std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
+    Port ( clk 				: 	in  	std_logic;								-- 16x clock input for clock recovery and oversampling
+		   rst 				:	in 		std_logic;
+		   rdn 				: 	in 		std_logic;								-- control signal initiates read operation
+           manchester_in 	: 	in  	std_logic;								-- incoming serial manchester-coded data
+           decoded_out 		: 	out  	std_logic_vector(15 downto 0);	        -- outgoing data word
+		   data_ready 		: 	out 	std_logic;								-- indicates that the decoded_out data is ready
+		   decode_error 	: 	out		std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
 			  );								
 end e_MANCHESTER_DECODER;
 
@@ -380,11 +380,14 @@ begin
 	if(rising_edge(clk)) then
 		if(rst = '1') then
 			r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+			
 		elsif(r_STATE = v_IDLE) then
 		    r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
+		    
 		elsif(r_STATE = v_START_BIT) then
 			r_START_BIT_BIT_TIME <= r_START_BIT_BIT_TIME + 1;
 			r_START_BIT_BIT_TIME_SAVED <= r_START_BIT_BIT_TIME;
+			
 		else
 			--r_START_BIT_BIT_TIME <= to_unsigned(0, v_SAMPLING_COUNTER_WIDTH);
 		end if;
@@ -430,12 +433,6 @@ begin
 			r_STATE <= v_RECEIVE_CRC;
 			
 			r_START_OF_STATE <= '1';
-			
-		--elsif((r_STATE = v_RECEIVE_SLAVE) and (r_MESSAGE_LENGTH_COUNTER = to_unsigned(v_MVB_WORD_WIDTH, v_MVB_WORD_WIDTH_WIDTH+1))) then
-		--	r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received
-		--	r_STATE <= v_RECEIVE_CRC;
-			
-		--	r_START_OF_STATE <= '1';
 			
 		elsif((r_STATE = v_RECEIVE_SLAVE) and (r_WORD_GROUP_COUNTER = to_unsigned(0, 3))) then
 			r_SLAVE_DATA_RECEIVED <= r_MAN_DATA_IN_SHIFT;		-- save slave message before more manchester stuff is received

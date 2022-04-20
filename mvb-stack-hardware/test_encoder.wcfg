@@ -3,77 +3,21 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="C:/Users/student/mvb-stack/mvb-stack-hardware/test_manchester_encoder_isim_beh.wdb" id="1" type="auto">
+      <db_ref path="test_manchester_encoder_behav.wdb" id="1">
          <top_modules>
-            <top_module name="numeric_std" />
-            <top_module name="std_logic_1164" />
-            <top_module name="std_logic_arith" />
-            <top_module name="std_logic_unsigned" />
+            <top_module name="glbl" />
             <top_module name="test_manchester_encoder" />
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="15" />
-   <wvobject fp_name="/test_manchester_encoder/clk" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/rst" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/start_transmission" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">start_transmission</obj_property>
-      <obj_property name="ObjectShortName">start_transmission</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/s_at_half_bt" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_at_half_bt</obj_property>
-      <obj_property name="ObjectShortName">s_at_half_bt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/s_at_full_bt" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_at_full_bt</obj_property>
-      <obj_property name="ObjectShortName">s_at_full_bt</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/s_encode_manchester" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_encode_manchester</obj_property>
-      <obj_property name="ObjectShortName">s_encode_manchester</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/r_state" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">r_state[2:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/rd_en" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">rd_en</obj_property>
-      <obj_property name="ObjectShortName">rd_en</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/dout" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">dout[7:0]</obj_property>
-      <obj_property name="ObjectShortName">dout[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/r_out_shift" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_out_shift[17:0]</obj_property>
-      <obj_property name="ObjectShortName">r_out_shift[17:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/r_encoded_out_shift" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_encoded_out_shift[1:0]</obj_property>
-      <obj_property name="ObjectShortName">r_encoded_out_shift[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/encoded_out" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">encoded_out</obj_property>
-      <obj_property name="ObjectShortName">encoded_out</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/s_reset_mlc" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">s_reset_mlc</obj_property>
-      <obj_property name="ObjectShortName">s_reset_mlc</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/r_message_length_counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_message_length_counter[4:0]</obj_property>
-      <obj_property name="ObjectShortName">r_message_length_counter[4:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_manchester_encoder/uut/r_data_length_counter" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">r_data_length_counter[7:0]</obj_property>
-      <obj_property name="ObjectShortName">r_data_length_counter[7:0]</obj_property>
-   </wvobject>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="66.727223 us"></ZoomEndTime>
+      <Cursor1Time time="61.000000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="193"></NameColumnWidth>
+      <ValueColumnWidth column_width="87"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="0" />
 </wave_config>
