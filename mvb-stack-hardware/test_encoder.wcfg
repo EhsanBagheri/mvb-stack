@@ -11,13 +11,89 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="66.727223 us"></ZoomEndTime>
-      <Cursor1Time time="61.000000 us"></Cursor1Time>
+      <ZoomStartTime time="2.883210 us"></ZoomStartTime>
+      <ZoomEndTime time="176.783211 us"></ZoomEndTime>
+      <Cursor1Time time="82.883210 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="193"></NameColumnWidth>
-      <ValueColumnWidth column_width="87"></ValueColumnWidth>
+      <NameColumnWidth column_width="190"></NameColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="0" />
+   <WVObjectSize size="17" />
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/start_transmission">
+      <obj_property name="ElementShortName">start_transmission</obj_property>
+      <obj_property name="ObjectShortName">start_transmission</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/clk">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/rst">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/data_length">
+      <obj_property name="ElementShortName">data_length[4:0]</obj_property>
+      <obj_property name="ObjectShortName">data_length[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_BT_COUNTER">
+      <obj_property name="ElementShortName">r_BT_COUNTER[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_BT_COUNTER[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/s_AT_HALF_BT">
+      <obj_property name="ElementShortName">s_AT_HALF_BT</obj_property>
+      <obj_property name="ObjectShortName">s_AT_HALF_BT</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/s_AT_FULL_BT">
+      <obj_property name="ElementShortName">s_AT_FULL_BT</obj_property>
+      <obj_property name="ObjectShortName">s_AT_FULL_BT</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/s_MLC_NEARING_RESET">
+      <obj_property name="ElementShortName">s_MLC_NEARING_RESET</obj_property>
+      <obj_property name="ObjectShortName">s_MLC_NEARING_RESET</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/s_RESET_MLC">
+      <obj_property name="ElementShortName">s_RESET_MLC</obj_property>
+      <obj_property name="ObjectShortName">s_RESET_MLC</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_MESSAGE_LENGTH_COUNTER">
+      <obj_property name="ElementShortName">r_MESSAGE_LENGTH_COUNTER[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_MESSAGE_LENGTH_COUNTER[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_DATA_LENGTH_COUNTER">
+      <obj_property name="ElementShortName">r_DATA_LENGTH_COUNTER[5:0]</obj_property>
+      <obj_property name="ObjectShortName">r_DATA_LENGTH_COUNTER[5:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_WORD_GROUP_COUNTER">
+      <obj_property name="ElementShortName">r_WORD_GROUP_COUNTER[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_WORD_GROUP_COUNTER[3:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/tested_encoder/rd_en">
+      <obj_property name="ElementShortName">rd_en</obj_property>
+      <obj_property name="ObjectShortName">rd_en</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/s_MESSAGE_WORD_ENCODED">
+      <obj_property name="ElementShortName">s_MESSAGE_WORD_ENCODED[17:0]</obj_property>
+      <obj_property name="ObjectShortName">s_MESSAGE_WORD_ENCODED[17:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_ENCODED_OUT_SHIFT">
+      <obj_property name="ElementShortName">r_ENCODED_OUT_SHIFT[17:0]</obj_property>
+      <obj_property name="ObjectShortName">r_ENCODED_OUT_SHIFT[17:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/test_manchester_encoder/tested_encoder/r_STATE">
+      <obj_property name="ElementShortName">r_STATE[2:0]</obj_property>
+      <obj_property name="ObjectShortName">r_STATE[2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/test_manchester_encoder/encoded_out">
+      <obj_property name="ElementShortName">encoded_out</obj_property>
+      <obj_property name="ObjectShortName">encoded_out</obj_property>
+   </wvobject>
 </wave_config>

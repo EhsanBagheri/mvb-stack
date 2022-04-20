@@ -113,7 +113,7 @@ FIFO : fifo_generator_0
 
 --_____________________________BIT TIME COUNTER_____________________________--
 s_AT_HALF_BT <= '1' when r_BT_COUNTER = to_unsigned(v_BIT_TIME/2-1, 8) else '0';	-- manchester code edge
-s_AT_FULL_BT <= '1' when r_BT_COUNTER = to_unsigned(v_BIT_TIME-1, 8) else '0';	-- data bit change
+s_AT_FULL_BT <= '1' when r_BT_COUNTER = to_unsigned(v_BIT_TIME-1, 8) else '0';	    -- data bit change
 
 p_BIT_TIME_COUNTER : process(clk)
 begin
@@ -148,7 +148,7 @@ begin
 		if(rst = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 5);
 			
-		elsif(s_RESET_MLC = '1' and s_AT_FULL_BT = '1') then
+		elsif(s_RESET_MLC = '1') then
 			r_MESSAGE_LENGTH_COUNTER <= to_unsigned(0, 5);
 			
 		elsif(s_AT_FULL_BT = '1') then
@@ -234,6 +234,9 @@ begin
 		    r_ENCODED_OUT_SHIFT <= s_CRC_ENCODED & "11";
 		    
 		elsif(s_RESET_MLC = '1' and (r_STATE = v_EMIT_MESSAGE or r_STATE = v_START_SEQUENCE)) then
+		    r_ENCODED_OUT_SHIFT <= s_MESSAGE_WORD_ENCODED;
+		    
+	    elsif(s_RESET_MLC = '1' and (r_STATE = v_EMIT_CRC and r_DATA_LENGTH_COUNTER > to_unsigned(0, 6))) then
 		    r_ENCODED_OUT_SHIFT <= s_MESSAGE_WORD_ENCODED;
 		    
 		elsif(r_STATE = v_IDLE) then

@@ -94,7 +94,69 @@ BEGIN
 		wait for clk_period;
 		start_transmission <= '0';
 
-
+-- TEST AGAIN
+		-- load fifo
+        wait for 15000 ns;
+        wr_en <= '1';
+		din <= "10101010";
+		wait for clk_period;	
+		din <= "11001100";		
+		wait for clk_period;		
+		wr_en <= '0';
+		
+		-- start transmission
+		wait for clk_period*10;
+		data_length <= std_logic_vector(to_unsigned(1, 5));
+		wait for clk_period;
+		start_transmission <= '1';
+		wait for clk_period;
+		start_transmission <= '0';
+		
+-- TEST FOR LONGER MESSAGE
+		-- load fifo
+        wait for 15000 ns;
+        wr_en <= '1';
+		din <= "10101010";
+		wait for clk_period;	
+		din <= "11001100";		
+		wait for clk_period;
+		din <= "11111111";
+		wait for clk_period;	
+		din <= "00000000";		
+		wait for clk_period;	
+		din <= "10101010";
+		wait for clk_period;	
+		din <= "11001100";
+		wait for clk_period;
+		din <= "11111111";
+		wait for clk_period;	
+		din <= "00000000";		
+		wait for clk_period;
+		din <= "10101010";
+		wait for clk_period;	
+		din <= "11001100";		
+		wait for clk_period;
+		din <= "11111111";
+		wait for clk_period;	
+		din <= "00000000";		
+		wait for clk_period;	
+		din <= "10101010";
+		wait for clk_period;	
+		din <= "11001100";
+		wait for clk_period;
+		din <= "11111111";
+		wait for clk_period;	
+		din <= "00000000";		
+		wait for clk_period;
+		wr_en <= '0';
+		
+		-- start transmission
+		wait for clk_period*10;
+		data_length <= std_logic_vector(to_unsigned(8, 5));
+		wait for clk_period;
+		start_transmission <= '1';
+		wait for clk_period;
+		start_transmission <= '0';
 
       wait;
    end process;
