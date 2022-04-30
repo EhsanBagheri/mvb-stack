@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/student/mvb-stack/mvb-stack-hardware/test_crc_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="test_crc" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="14" />
+   <wvobject fp_name="/test_crc/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/i" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">i</obj_property>
+      <obj_property name="ObjectShortName">i</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/wr" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">wr</obj_property>
+      <obj_property name="ObjectShortName">wr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/serial_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">serial_in</obj_property>
+      <obj_property name="ObjectShortName">serial_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/shift_zeroes" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">shift_zeroes</obj_property>
+      <obj_property name="ObjectShortName">shift_zeroes</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/rdy" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rdy</obj_property>
+      <obj_property name="ObjectShortName">rdy</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/v_idle" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">v_idle[1:0]</obj_property>
+      <obj_property name="ObjectShortName">v_idle[1:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/r_zeroes_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_zeroes_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_zeroes_counter[3:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/r_crc_shift_register" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_crc_shift_register[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_crc_shift_register[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/s_crc_shift_register_next" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">s_crc_shift_register_next[7:0]</obj_property>
+      <obj_property name="ObjectShortName">s_crc_shift_register_next[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/parity_bit" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">parity_bit</obj_property>
+      <obj_property name="ObjectShortName">parity_bit</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/tested_crc/s_pre_negation_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">s_pre_negation_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">s_pre_negation_out[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_crc/crc_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">crc_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">crc_out[7:0]</obj_property>
+   </wvobject>
+</wave_config>

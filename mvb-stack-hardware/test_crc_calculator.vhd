@@ -27,7 +27,7 @@ ARCHITECTURE behavior OF test_crc_calculator IS
 	constant input_length_32 : std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(32, 7));
 	constant input_length_64 : std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(64, 7));
 	
-	constant dummy_message_16 : std_logic_vector(15 downto 0) := "0101010101010101";--"0011001111001100"; --"1100001101111110";
+	constant dummy_message_16 : std_logic_vector(16 downto 0) := "00101010101010101";--"0011001111001100"; --"1100001101111110";
 	constant dummy_message_32 : std_logic_vector(31 downto 0) := "10101010110011001010101011001100";
 	constant dummy_message_64 : std_logic_vector(63 downto 0) := "1010101011001100101010101100110010101010110011001010101011001100";
 	
@@ -89,7 +89,7 @@ BEGIN
 					serial_input <= dummy_message_16(i);
 					i <= i + 1;
 				end if;
-				if(i = 15) then i <= 0; end if;
+				if(i = 16) then i <= 0; end if;
 		end if;
 	end process manchester_gen;
 
