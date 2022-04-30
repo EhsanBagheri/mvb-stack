@@ -10,7 +10,7 @@ entity e_CRC is
 			  wr 	: in  STD_LOGIC;
            serial_in : in  STD_LOGIC;
 			  shift_zeroes : in STD_LOGIC;
-			  rdy		 : out  STD_LOGIC;
+			  crc_rdy		 : out  STD_LOGIC;
            crc_out : out  STD_LOGIC_VECTOR (7 downto 0));
 end e_CRC;
 
@@ -128,14 +128,14 @@ begin
 			
 		elsif(r_STATE = v_IDLE and wr = '1') then
 			r_STATE <= v_SHIFT_INPUT;
-			rdy <= '0';
+			crc_rdy <= '0';
 			
 		elsif(r_STATE = v_SHIFT_INPUT and shift_zeroes = '1') then
 			r_STATE <= v_SHIFT_ZEROES;
 			
 		elsif(r_STATE = v_SHIFT_ZEROES and r_ZEROES_COUNTER = to_unsigned(0, 4)) then
 			r_STATE <= v_IDLE;
-			rdy <= '1';
+			crc_rdy <= '1';
 			crc_out <= not s_PRE_NEGATION_OUT;
 		
 		end if;

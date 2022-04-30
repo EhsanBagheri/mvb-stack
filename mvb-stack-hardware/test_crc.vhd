@@ -21,7 +21,7 @@ ARCHITECTURE behavior OF test_crc IS
          wr : IN  std_logic;
          serial_in : IN  std_logic;
          shift_zeroes : IN  std_logic;
-         rdy : OUT  std_logic;
+         crc_rdy : OUT  std_logic;
          crc_out : OUT  std_logic_vector(7 downto 0)
         );
     END COMPONENT;
@@ -35,7 +35,7 @@ ARCHITECTURE behavior OF test_crc IS
    signal shift_zeroes : std_logic := '0';
 
  	--Outputs
-   signal rdy : std_logic;
+   signal crc_rdy : std_logic;
    signal crc_out : std_logic_vector(7 downto 0);
 
    -- Clock period definitions
@@ -59,7 +59,7 @@ BEGIN
           wr => wr,
           serial_in => serial_in,
           shift_zeroes => shift_zeroes,
-          rdy => rdy,
+          crc_rdy => crc_rdy,
           crc_out => crc_out
         );
 		  

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/student/mvb-stack/mvb-stack-hardware/test_manchester_decoder_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_textio" />
+            <top_module name="test_manchester_decoder" />
+            <top_module name="textio" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="26" />
+   <wvobject fp_name="/test_manchester_decoder/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/rdn" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rdn</obj_property>
+      <obj_property name="ObjectShortName">rdn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/manchester_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">manchester_in</obj_property>
+      <obj_property name="ObjectShortName">manchester_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/decoded_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">decoded_out[15:0]</obj_property>
+      <obj_property name="ObjectShortName">decoded_out[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/data_ready" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">data_ready</obj_property>
+      <obj_property name="ObjectShortName">data_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_state" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_state[2:0]</obj_property>
+      <obj_property name="ObjectShortName">r_state[2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_current_bit_decoded" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">r_current_bit_decoded</obj_property>
+      <obj_property name="ObjectShortName">r_current_bit_decoded</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_start_delimiter_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_delimiter_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_delimiter_counter[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_group_counter_init_value" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_group_counter_init_value[2:0]</obj_property>
+      <obj_property name="ObjectShortName">r_group_counter_init_value[2:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_word_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_word_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_word_counter[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_word_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_word_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_word_counter[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_message_length_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_message_length_counter[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_message_length_counter[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_crc_length_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_crc_length_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_crc_length_counter[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_man_data_in_shift" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_man_data_in_shift[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_man_data_in_shift[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_start_delimiter_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_start_delimiter_in[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_start_delimiter_in[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_next_expected_slave_message_length" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_next_expected_slave_message_length[4:0]</obj_property>
+      <obj_property name="ObjectShortName">r_next_expected_slave_message_length[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_last_received_master_data" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_last_received_master_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_last_received_master_data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_slave_data_received" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_slave_data_received[15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_slave_data_received[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/r_crc_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_crc_in[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_crc_in[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/crc_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">crc_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">crc_out[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/c_CRC_CALCULATOR/r_state" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">r_state[1:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/c_CRC_CALCULATOR/wr" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">wr</obj_property>
+      <obj_property name="ObjectShortName">wr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/c_CRC_CALCULATOR/r_zeroes_counter" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_zeroes_counter[3:0]</obj_property>
+      <obj_property name="ObjectShortName">r_zeroes_counter[3:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/c_CRC_CALCULATOR/s_crc_shift_register_next" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">s_crc_shift_register_next[7:0]</obj_property>
+      <obj_property name="ObjectShortName">s_crc_shift_register_next[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_manchester_decoder/tested_decoder/c_CRC_CALCULATOR/r_crc_shift_register" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">r_crc_shift_register[7:0]</obj_property>
+      <obj_property name="ObjectShortName">r_crc_shift_register[7:0]</obj_property>
+   </wvobject>
+</wave_config>

@@ -6,13 +6,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity e_MANCHESTER_DECODER is
-    Port ( clk 				: 	in  	std_logic;								-- 16x clock input for clock recovery and oversampling
-		   rst 				:	in 		std_logic;
-		   rdn 				: 	in 		std_logic;								-- control signal initiates read operation
-           manchester_in 	: 	in  	std_logic;								-- incoming serial manchester-coded data
-           decoded_out 		: 	out  	std_logic_vector(15 downto 0);	        -- outgoing data word
-		   data_ready 		: 	out 	std_logic;								-- indicates that the decoded_out data is ready
-		   decode_error 	: 	out		std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
+    Port ( 	clk 				: 	in  	std_logic;								-- 16x clock input for clock recovery and oversampling
+				rst 				:	in 	std_logic;
+				rdn 				: 	in 	std_logic;								-- control signal initiates read operation
+				manchester_in 	: 	in  	std_logic;								-- incoming serial manchester-coded data
+				decoded_out 	: 	out  	std_logic_vector(15 downto 0);	        -- outgoing data word
+				data_ready 		: 	out 	std_logic;								-- indicates that the decoded_out data is ready
+				decode_error 	: 	out	std_logic								-- an error has occured in the decode process (e. g. there was no edge mid-bit)
 			  );								
 end e_MANCHESTER_DECODER;
 
@@ -36,6 +36,27 @@ constant v_END_DELIMITER : std_logic_vector(2 downto 0) := "110";
 constant v_MASTER_DELIMITER : std_logic_vector(15 downto 0) := "1100011100010101";
 constant v_SLAVE_DELIMITER : std_logic_vector(15 downto 0) := "1010100011100011";
 
+------------------------------------------------------------------
+----------------------- EXTERNAL COMPONENTS ----------------------
+------------------------------------------------------------------
+
+component e_CRC is
+    Port ( clk : in  STD_LOGIC;
+           rst : in  STD_LOGIC;
+			  wr 	: in  STD_LOGIC;
+           serial_in : in  STD_LOGIC;
+			  shift_zeroes : in STD_LOGIC;
+			  crc_rdy		 : out  STD_LOGIC;
+           crc_out : out  STD_LOGIC_VECTOR (7 downto 0));
+end component;
+
+signal wr : std_logic;
+signal serial_in : std_logic;
+signal shift_zeroes : std_logic;
+signal crc_rdy : std_logic;
+signal crc_out : std_logic_vector(7 downto 0);
+signal reset_crc : std_logic;
+
 
 ---------------------------------------------------------------
 ---------------------- INTERNAL SIGNALS -----------------------
@@ -47,9 +68,9 @@ signal r_CURRENT_BIT_DECODED : std_logic;													-- non-manchester value of
 signal r_MESSAGE_LENGTH_COUNTER : unsigned(4 downto 0);								-- number of decoded bits in the current message --> state machine can determine when the CRC should be expected
 signal s_MESSAGE_WORD_READY : std_logic := '0';											-- 16 bit word has been received on the manchester coded input
 signal r_SLAVE_DATA_RECEIVED : std_logic_vector(15 downto 0);						-- register that stores the complete DATA part of a frame (currently 16 bits only)
-signal r_WORD_COUNTER : unsigned(4 downto 0);										-- how many 16 bit words need to be read until the transmission is over?
-signal r_WORD_GROUP_COUNTER : unsigned(2 downto 0);                                 -- how many times 16 bits are left from the current 64 bit stack
-signal r_GROUP_COUNTER_INIT_VALUE : unsigned(2 downto 0);                           -- value to which r_WORD_GROUP_COUNTER will be set at the start of each receive data phase
+signal r_WORD_COUNTER : unsigned(4 downto 0);											-- how many 16 bit words need to be read until the transmission is over?
+signal r_WORD_GROUP_COUNTER : unsigned(2 downto 0);                           -- how many times 16 bits are left from the current 64 bit stack
+signal r_GROUP_COUNTER_INIT_VALUE : unsigned(2 downto 0);                     -- value to which r_WORD_GROUP_COUNTER will be set at the start of each receive data phase
 
 -- registers and signals for bit time measurement
 signal r_INPUT_BIT_TIME_SHIFT : std_logic_vector(1 downto 0);						-- fast-changing shift register for low delay edge detection in manchester_in
@@ -71,13 +92,14 @@ signal s_START_DELIMITER_VALUE_CHECK : std_logic_vector(1 downto 0) := "00";			-
 
 -- signals for receiving the 8 bit check sequence (CRC)
 signal r_CRC_IN : std_logic_vector(7 downto 0) := "00000000";						-- input shift register for the CRC
-signal s_CRC_READY : std_logic := '0';												-- '1' when the CRC is completely received
-signal r_CRC_LENGTH_COUNTER : unsigned(3 downto 0);                                 -- counts how many bits of the CRC have been received, bc r_MESSAGE_LENGTH_COUNTER is needed elsewhere
+signal s_CRC_READY : std_logic := '0';														-- '1' when the CRC is completely received
+signal r_CRC_LENGTH_COUNTER : unsigned(3 downto 0);                           -- counts how many bits of the CRC have been received, bc r_MESSAGE_LENGTH_COUNTER is needed elsewhere
+signal s_CRC_ERROR : std_logic;																-- incorrect CRC received, data is corrupted
 
 -- signal representing the end of the end delimiter									(end delimiter is: NL symbol for ESD, NL + NH symbols for EMD)
 signal s_END_OF_END_DELIMITER : std_logic := '0';										-- 1 when the bus has been in a low state for longer than 0.5BT + 0.125 us
 signal r_END_DELIMITER_COUNTER : unsigned(v_SAMPLING_COUNTER_WIDTH-1 downto 0);
-signal r_START_OF_STATE : std_logic := '0';                                           -- signal that is of value '1' for a clock cycle when the state machine switches
+signal r_START_OF_STATE : std_logic := '0';                                   -- signal that is of value '1' for a clock cycle when the state machine switches
 
 -- state machine signals:
 signal r_STATE : std_logic_vector(2 downto 0) := "000";
@@ -347,7 +369,46 @@ begin
 		end if;
 	end if;
 end process p_CRC_LENGTH_COUNTER;
-										
+
+c_CRC_CALCULATOR : e_CRC PORT MAP (
+          clk => clk,
+          rst => reset_crc,
+          wr => wr,
+          serial_in => serial_in,
+          shift_zeroes => shift_zeroes,
+          crc_rdy => crc_rdy,
+          crc_out => crc_out
+);
+
+-- control signals of the CRC calculation module
+p_SCHEDULE_CRC_CALCULATION : process(clk)
+begin
+	if(rising_edge(clk)) then
+		if(rst = '1') then
+			reset_crc <= '1';
+		
+		-- set input at the same time r_MAN_DATA_IN_SHIFT is being written, so the result is 100% the same
+		elsif((r_SAMPLING_COUNTER = r_SAMPLING_COUNTER_AT_HALF_BIT*2) and (r_STATE = v_RECEIVE_MASTER or r_STATE = v_RECEIVE_SLAVE)) then
+			wr <= '1';
+			serial_in <= r_CURRENT_BIT_DECODED;
+			
+		elsif(r_STATE = v_RECEIVE_CRC) then
+			shift_zeroes <= '1';
+		
+		else
+			reset_crc <= '0';
+			wr <= '0';
+			shift_zeroes <= '0';
+			
+		end if;
+	end if;
+end process p_SCHEDULE_CRC_CALCULATION;
+
+-- continually emit error msg, rest of the hardware will know when to read
+s_CRC_ERROR <= '0' when r_CRC_IN = crc_out else '1';
+
+
+								
 --_____________________________END DELIMITER RECEPTION_____________________________--
 -- the end delimiter is a low bus state, that is longer than 0.75BT + 0.125 us
 s_END_OF_END_DELIMITER <= '1' when (r_END_DELIMITER_COUNTER = r_START_BIT_BIT_TIME*3/4 + v_125us) else '0';

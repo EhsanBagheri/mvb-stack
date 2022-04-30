@@ -39,10 +39,10 @@ ARCHITECTURE behavior OF test_manchester_decoder IS
 	signal data_ready : std_logic := '0';
 	signal input_sync_counter : unsigned(7 downto 0) := to_unsigned(0, 8);
 	
-	signal master_frame : std_logic_vector(67 downto 0);	-- start bit: 2 | start delim: 18 | data: 32 | crc: 16 | end delim: 2
+	signal master_frame : std_logic_vector(83 downto 0);	-- start bit: 2 | start delim: 18 | data: 32 | crc: 16 | end delim: 2
 	signal slave_frame : std_logic_vector(309 downto 0);
 	
-	signal test_manchester_code : std_logic_vector(401 downto 0); 
+	signal test_manchester_code : std_logic_vector(417 downto 0); 
 	
 	
 BEGIN
@@ -72,7 +72,7 @@ BEGIN
 		
 	--	wait;
 	--end process get_test_master_frame;
-	master_frame <= "00000000110101101001011010010110101010010110101000111000110100000000";
+	master_frame <= "000000001101100110010110100101101001011010010110101010010110101000111000110100000000";
 	slave_frame <= "1110101010010101011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110101010010101010101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100101101011000111000101010100";
 
 	
@@ -116,7 +116,7 @@ BEGIN
 					manchester_in <= test_manchester_code(i);
 					i <= i + 1;
 				end if;
-				if(i = 401) then i <= 0; end if;
+				if(i = 417) then i <= 0; end if;
 		end if;
 	end process manchester_gen;
 
